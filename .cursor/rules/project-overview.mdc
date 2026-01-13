@@ -1,0 +1,151 @@
+---
+description: "Core project context and patterns"
+alwaysApply: true
+---
+
+# Customer Support AI Agent - Project Overview
+
+This is a customer support chat AI agent that can scrape websites, store content in a database, and answer user questions based on the stored information. The system consists of a Next.js/React frontend and a Python Flask backend.
+
+## Tech Stack
+
+### Frontend
+- **Framework**: Next.js 14+ (App Router recommended)
+- **UI Library**: React 18+
+- **Styling**: Tailwind CSS or CSS Modules
+- **State Management**: React Context API or Zustand
+- **HTTP Client**: Fetch API or Axios
+- **Real-time Communication**: WebSocket (Socket.io client) or Server-Sent Events
+- **Language**: TypeScript
+
+### Backend
+- **Framework**: Python Flask 2.3+
+- **API Style**: RESTful API
+- **Real-time**: Flask-SocketIO (optional)
+- **HTTP Client**: Requests library
+- **Environment Management**: python-dotenv
+
+### AI/ML
+- **LLM Provider**: OpenAI GPT-4 or GPT-3.5-turbo
+- **Embeddings**: OpenAI text-embedding-ada-002 (for vector search)
+- **Python SDK**: openai library
+
+### Database
+- **Primary Option**: PostgreSQL with pgvector extension (recommended for vector similarity search)
+- **Use Case**: Store scraped website content chunks with optional vector embeddings for semantic search
+
+### Web Scraping
+- **API Service**: Firecrawl API
+- **Python SDK**: firecrawl-py
+- **Content Processing**: Markdown conversion, text extraction (handled by Firecrawl), chunking
+
+## Frontend Directory Structure
+
+### `src/app/`
+**Purpose**: Next.js App Router directory containing page components and layouts.
+
+**Contents**:
+- `page.tsx` - Main chat page component that renders the chat interface
+- `layout.tsx` - Root layout component that wraps all pages (provides global structure, metadata, and shared UI)
+- `api/` - Optional Next.js API routes if needed for server-side API proxying or middleware
+
+### `src/components/`
+**Purpose**: Reusable React components for the chat interface and UI elements.
+
+**Contents**:
+- `ChatWindow.tsx` - Main chat interface container that orchestrates all chat-related components
+- `MessageList.tsx` - Component that displays the list of messages (user and agent messages)
+- `MessageInput.tsx` - Input field component with send button for user message entry
+- `MessageBubble.tsx` - Individual message component that renders a single message (user or agent) with styling
+- `WebsiteInput.tsx` - Component for inputting and submitting website URLs for scraping
+
+### `src/hooks/`
+**Purpose**: Custom React hooks for state management and side effects.
+
+**Contents**:
+- `useChat.ts` - Custom hook for managing chat state (messages, conversation ID, loading states, etc.)
+- `useWebSocket.ts` - Optional hook for WebSocket connection management if real-time communication is implemented
+
+### `src/lib/`
+**Purpose**: Utility libraries and helper functions.
+
+**Contents**:
+- `api.ts` - API client functions that handle HTTP requests to the Flask backend (POST /api/chat/message, POST /api/websites/scrape, etc.)
+
+### `src/types/`
+**Purpose**: TypeScript type definitions and interfaces.
+
+**Contents**:
+- `index.ts` - TypeScript type definitions for messages, API responses, website data, conversation objects, etc.
+
+## Backend Directory Structure
+
+### `backend/`
+**Purpose**: Root directory for all Python Flask backend code.
+
+### `backend/app.py`
+**Purpose**: Flask application entry point that initializes the Flask app, registers blueprints, configures CORS, and starts the server.
+
+### `backend/config.py`
+**Purpose**: Configuration management module that loads environment variables, sets up database connections, and manages application settings.
+
+### `backend/routes/`
+**Purpose**: Flask route handlers organized by feature domain.
+
+**Contents**:
+- `chat.py` - API endpoints for chat functionality (POST /api/chat/message handles user questions and returns AI responses)
+- `web_crawl.py` - API endpoints for website scraping (POST /api/websites/scrape, GET /api/websites, GET /api/websites/:id)
+
+### `backend/services/`
+**Purpose**: Business logic and external service integrations.
+
+**Contents**:
+- `openai_service.py` - Service for interacting with OpenAI API (sending prompts to GPT, generating embeddings, handling responses)
+- `scraping_service.py` - Firecrawl API integration for web scraping that fetches and extracts website content
+- `database_service.py` - Database operations (CRUD for websites and content chunks, vector similarity search, SQL queries)
+- `embedding_service.py` - Service for generating vector embeddings using OpenAI's embedding API for semantic search
+- `prompts.py` - System prompts and prompt templates for the AI agent (customer support agent instructions, context formatting)
+
+### `backend/models/`
+**Purpose**: Data models and database schema definitions.
+
+**Contents**:
+- `website.py` - Data model for website entities (id, url, title, scraped_at, status)
+- `message.py` - Data model for chat messages and conversation history (message content, sender, timestamp, conversation_id)
+
+### `backend/utils/`
+**Purpose**: Utility functions and helper modules.
+
+**Contents**:
+- `text_processing.py` - Text processing utilities (cleaning HTML, chunking text into 500-1000 token pieces, preserving semantic boundaries)
+- `validators.py` - Validation utilities (URL validation, input sanitization, data validation)
+
+### `backend/requirements.txt`
+**Purpose**: Python package dependencies file listing all required packages and their versions (Flask, openai, firecrawl-py, psycopg2-binary, etc.)
+
+## Key Features
+
+1. **Website Scraping**: Users can provide website URLs via chat, which are scraped, processed, chunked, and stored in the database
+2. **Question Answering**: Users can ask questions, and the AI agent retrieves relevant content from the database and generates responses using OpenAI GPT
+3. **Chat Interface**: Real-time chat UI built with React/Next.js for user-agent communication
+4. **Context Retrieval**: Uses vector similarity search (recommended) or text-to-SQL to find relevant content chunks from stored websites
+
+## API Endpoints
+
+- `POST /api/chat/message` - Send user message and receive AI response
+- `POST /api/websites/scrape` - Submit website URL for scraping
+- `GET /api/websites` - List all scraped websites
+- `GET /api/websites/:id` - Get specific website details and chunks
+- `GET /api/health` - Health check endpoint
+
+## General Guidelines
+
+When planning a complex code change, always start by writing a plan of action and then asking me for approval to act on the plan. 
+
+For simple changes, You may make the code change but think carefully and step-by-step about the change itself.
+
+When a function becomes too long, split it into smaller functions.
+
+When debugging a problem, make sure you have sufficient information to deeply understand the problem.
+
+More often than not, opt in to adding more logging and tracing to the code to help you understand the problem before making any changes. If you are provided logs that make the source of the problem obvious, then implement a solution. If you're still not 100% confident about the source of the problem, then reflect on 4-6 different possible sources of the problem, distill those down to 1-2 most likely sources, and then implement a solution for the most likely source - either adding more logging to validate your theory or implement the actual fix if you're extremely confident about the source of the problem.
