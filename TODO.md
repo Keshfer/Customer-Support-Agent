@@ -11,36 +11,36 @@ This TODO list follows the implementation plan with alternating implementation a
 - [x] **Implement**: Create `backend/` directory structure
 - [x] **Implement**: Set up `requirements.txt` with all dependencies
 - [x] **Test**: Verify all packages can be installed: `pip install -r requirements.txt`
-- [ ] **Implement**: Create `backend/config.py` to load environment variables
-- [ ] **Test**: Verify config loads `.env` variables correctly (print values in test script)
-- [ ] **Implement**: Create `backend/app.py` with Flask app, CORS, and health endpoint
-- [ ] **Test**: Start Flask server and verify `GET /api/health` returns `{ "status": "healthy" }`
+- [x] **Implement**: Create `backend/config.py` to load environment variables
+- [x] **Test**: Verify config loads `.env` variables correctly (print values in test script)
+- [x] **Implement**: Create `backend/app.py` with Flask app, CORS, and health endpoint
+- [x] **Test**: Start Flask server and verify `GET /api/health` returns `{ "status": "healthy" }`
 
 ### Frontend Setup
 
-- [ ] **Implement**: Initialize Next.js 14+ project with TypeScript
-- [ ] **Test**: Verify dev server starts: `npm run dev` → should see app on `http://localhost:3000`
-- [ ] **Implement**: Set up Tailwind CSS configuration
-- [ ] **Test**: Create test component with Tailwind classes to verify styling works
-- [ ] **Implement**: Create `src/` directory structure (app, components, hooks, lib, types)
-- [ ] **Implement**: Create `src/app/layout.tsx` with dark theme
-- [ ] **Test**: Verify dark theme is applied (background should be dark)
-- [ ] **Implement**: Create `src/app/page.tsx` placeholder
-- [ ] **Test**: Verify page renders without errors
-- [ ] **Implement**: Create `src/types/index.ts` with all type definitions
-- [ ] **Test**: Import types in test file to verify TypeScript compilation
-- [ ] **Implement**: Create `src/lib/api.ts` with API client setup
-- [ ] **Test**: Verify API client can make request to `http://localhost:5000/api/health`
+- [x] **Implement**: Initialize Next.js 14+ project with TypeScript
+- [x] **Test**: Verify dev server starts: `npm run dev` → should see app on `http://localhost:3000`
+- [x] **Implement**: Set up Tailwind CSS configuration
+- [x] **Test**: Create test component with Tailwind classes to verify styling works
+- [x] **Implement**: Create `src/` directory structure (app, components, hooks, lib, types)
+- [x] **Implement**: Create `src/app/layout.tsx` with dark theme
+- [x] **Test**: Verify dark theme is applied (background should be dark)
+- [x] **Implement**: Create `src/app/page.tsx` placeholder
+- [x] **Test**: Verify page renders without errors
+- [x] **Implement**: Create `src/types/index.ts` with all type definitions
+- [x] **Test**: Import types in test file to verify TypeScript compilation
+- [x] **Implement**: Create `src/lib/api.ts` with API client setup
+- [x] **Test**: Verify API client can make request to `http://localhost:5000/api/health`
 
 ### Database Setup
 
-- [ ] **Implement**: Set up PostgreSQL database and install pgvector extension
-- [ ] **Test**: Connect to database and run `SELECT * FROM pg_extension WHERE extname = 'vector';`
-- [ ] **Implement**: Create database schema (websites and content_chunks tables)
-- [ ] **Test**: Verify tables exist: `\dt` in psql or `SELECT table_name FROM information_schema.tables;`
-- [ ] **Implement**: Create `backend/models/website.py` SQLAlchemy model
-- [ ] **Implement**: Create `backend/models/message.py` SQLAlchemy model
-- [ ] **Test**: Import models in test script and verify they can be instantiated
+- [x] **Implement**: Set up PostgreSQL database and install pgvector extension
+- [x] **Test**: Connect to database and run `SELECT * FROM pg_extension WHERE extname = 'vector';`
+- [x] **Implement**: Create database schema (websites and content_chunks tables)
+- [x] **Test**: Verify tables exist: `\dt` in psql or `SELECT table_name FROM information_schema.tables;`
+- [x] **Implement**: Create `backend/models/website.py` SQLAlchemy model
+- [x] **Implement**: Create `backend/models/message.py` SQLAlchemy model
+- [x] **Test**: Import models in test script and verify they can be instantiated
 
 ---
 
