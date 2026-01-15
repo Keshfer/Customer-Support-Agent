@@ -50,7 +50,7 @@ This TODO list follows the implementation plan with alternating implementation a
 
 - [ ] **Implement**: Create `backend/services/database_service.py` with connection management
 - [ ] **Test**: Test database connection (create test script that connects successfully)
-- [ ] **Implement**: Add CRUD operations for websites (create, get, get_all, update_status)
+- [x] **Implement**: Add CRUD operations for websites (create, get, get_all, update_status)
 - [ ] **Test**: Create test script that creates a website, retrieves it, and verifies data
 - [ ] **Implement**: Add CRUD operations for content chunks (create, get, get_by_website)
 - [ ] **Test**: Create test script that creates chunks and retrieves them by website_id
