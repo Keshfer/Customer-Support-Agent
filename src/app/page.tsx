@@ -1,5 +1,7 @@
+import TailWindTest from '@/components/TailwindTest'
+
 export default function Home() {
-  return (
+  /*return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4">Customer Support AI Agent</h1>
@@ -7,4 +9,8 @@ export default function Home() {
       </div>
     </main>
   )
+    */
+   return (
+    <TailWindTest />
+   )
 }

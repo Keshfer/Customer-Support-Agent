@@ -30,7 +30,7 @@ export interface WebsiteListResponse {
   websites: Website[];
 }
 
-export interface WebsiteDetailResponse {
+export interface WebsiteChunksResponse {
   website: Website;
   chunks: ContentChunk[];
 }

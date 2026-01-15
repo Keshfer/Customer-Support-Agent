@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from datetime import datetime
-from .base import Base
+from datetime import datetime, timezone
+from base import Base
 
 class Website(Base):
     """SQLAlchemy model for websites table."""
@@ -9,7 +9,7 @@ class Website(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     url = Column(String(2048), unique=True, nullable=False)
     title = Column(String(512))
-    scraped_at = Column(DateTime, default=datetime.now(datetime.timezone.utc))
+    scraped_at = Column(DateTime, default=datetime.now(timezone.utc))
     status = Column(String(50))  # 'pending', 'completed', 'failed'
     
     def __repr__(self):

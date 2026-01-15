@@ -1,3 +1,142 @@
+# Python
+# ======
+# __pycache__/ - Python bytecode cache directories created when Python imports modules
+# These are automatically generated and should not be committed
+__pycache__/
+*.py[cod]  # Compiled Python files (.pyc, .pyo, .pyd)
+*$py.class  # Python class files
+
+# Virtual Environments
+# ====================
+# .venv/, venv/, env/ - Python virtual environments contain installed packages
+# These are large and environment-specific, should be recreated with requirements.txt
 .venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python Package Metadata
+# =======================
+# *.egg-info/ - Package installation metadata
+# dist/, build/ - Built distribution packages
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Testing & Coverage
+# ==================
+# .pytest_cache/ - Pytest cache directory
+# .coverage, coverage/ - Test coverage reports
+# htmlcov/ - HTML coverage reports
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+.tox/
+.nox/
+
+# Node.js / Next.js
+# =================
+# node_modules/ - NPM packages, large and can be reinstalled with package.json
+node_modules/
+
+# .next/ - Next.js build output and cache
+# Contains compiled pages and optimized assets, regenerated on build
+.next/
+out/  # Next.js static export output
+
+# Build outputs
+# =============
+# build/ - General build output directory
+# dist/ - Distribution files
+build/
+dist/
+
+# Environment Variables
+# =====================
+# .env - Contains sensitive API keys and database credentials
+# .env.local, .env.*.local - Local environment overrides
+# These should NEVER be committed as they contain secrets
 .env
-node_modules
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# IDE / Editor
+# ============
+# .vscode/ - VS Code workspace settings (optional - some teams commit this)
+# .idea/ - IntelliJ IDEA / PyCharm settings
+# *.swp, *.swo - Vim swap files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+# =========
+# .DS_Store - macOS Finder metadata
+# Thumbs.db - Windows thumbnail cache
+# Desktop.ini - Windows folder customization
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Logs
+# ====
+# *.log - Application log files
+# logs/ - Log directories
+*.log
+logs/
+*.log.*
+
+# Database
+# =========
+# *.db, *.sqlite - Local SQLite database files (if used for testing)
+# These should not be committed as they contain data
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary Files
+# ===============
+# *.tmp, *.temp - Temporary files
+*.tmp
+*.temp
+.cache/
+
+# TypeScript
+# ===========
+# *.tsbuildinfo - TypeScript incremental build information
+*.tsbuildinfo
+
+# Next.js Specific
+# ================
+# .vercel - Vercel deployment configuration (optional)
+# .turbo - Turbo build cache
+.vercel
+.turbo
+
+# Testing
+# =======
+# Test output and coverage
+.nyc_output/
+coverage/
+
+# Misc
+# ====
+# package-lock.json - Usually committed, but some teams ignore it
+# yarn.lock - If using Yarn instead of npm
+# Uncomment if you want to ignore lock files:
+# package-lock.json
+# yarn.lock

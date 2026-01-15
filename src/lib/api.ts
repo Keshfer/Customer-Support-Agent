@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import type { ChatResponse, ScrapeResponse, WebsiteListResponse, WebsiteDetailResponse, ApiError } from '@/types';
+import type { ChatResponse, ScrapeResponse, WebsiteListResponse, WebsiteChunksResponse, ApiError } from '@/types';
 
 // Get API URL from environment variable
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -71,9 +71,9 @@ export async function getWebsites(): Promise<WebsiteListResponse> {
   }
 }
 
-export async function getWebsite(id: number): Promise<WebsiteDetailResponse> {
+export async function getWebsite(id: number): Promise<WebsiteChunksResponse> {
   try {
-    const response = await apiClient.get<WebsiteDetailResponse>(`/api/websites/${id}`);
+    const response = await apiClient.get<WebsiteChunksResponse>(`/api/websites/${id}`);
     return response.data;
   } catch (error) {
     throw handleApiError(error);
