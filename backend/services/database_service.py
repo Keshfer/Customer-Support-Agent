@@ -40,8 +40,37 @@ def get_website(id):
 	except Exception as e:
 		return None, f"Error getting website: {e}"
 
+def get_all_websites():
+	try:
+		conn = psycopg2.connect(DATABASE_URL)
+		cursor = conn.cursor()
+		cursor.execute("""
+			SELECT * FROM websites;
+		""")
+		websites = cursor.fetchall()
+		cursor.close()
+	except Exception as e:
+		return None, f"Error getting all websites: {e}"
 
+def update_website_status(id, status):
+	try:
+		conn = psycopg2.connect(DATABASE_URL)
+		cursor = conn.cursor()
+		cursor.execute("""
+			UPDATE websites SET status = %s WHERE id = %s;
+		""", (status, id))
+		conn.commit()
+		cursor.close()
+		conn.close()
+		return True, None
+	except Exception as e:
+		return False, f"Error updating website status: {e}"
 
+#CRUD operations for content_chunks
+    # - `create_chunk(website_id, chunk_text, chunk_index, embedding, metadata)`
+    # - `get_chunks_by_website(website_id)`
+    # - `get_chunk(id)`
+# def create_chunk(website_id, chunk_text, chunk_indesx, embedding, meatadata):
 
 
 	
