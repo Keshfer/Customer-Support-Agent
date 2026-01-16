@@ -48,15 +48,15 @@ This TODO list follows the implementation plan with alternating implementation a
 
 ### Database Service
 
-- [ ] **Implement**: Create `backend/services/database_service.py` with connection management
+- [x] **Implement**: Create `backend/services/database_service.py` with connection management
 - [ ] **Test**: Test database connection (create test script that connects successfully)
 - [x] **Implement**: Add CRUD operations for websites (create, get, get_all, update_status)
 - [ ] **Test**: Create test script that creates a website, retrieves it, and verifies data
-- [ ] **Implement**: Add CRUD operations for content chunks (create, get, get_by_website)
+- [x] **Implement**: Add CRUD operations for content chunks (create, get, get_by_website)
 - [ ] **Test**: Create test script that creates chunks and retrieves them by website_id
-- [ ] **Implement**: Add vector similarity search function
+- [x] **Implement**: Add vector similarity search function
 - [ ] **Test**: Create test script with sample embeddings and verify similarity search returns correct chunks
-- [ ] **Implement**: Add conversation/message storage functions
+- [x] **Implement**: Add conversation/message storage functions
 - [ ] **Test**: Create test script that saves messages and retrieves conversation history
 
 ### Text Processing Utilities
