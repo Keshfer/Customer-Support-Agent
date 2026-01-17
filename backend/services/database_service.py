@@ -1,18 +1,20 @@
 import psycopg2
+from pgvector.psycopg2 import register_vector
+import psycopg2.pool
 from config import DATABASE_URL
 import logging
 from contextlib import contextmanager
-    # - `create_website(url, title, status)`
-    # - `get_website(id)`
-    # - `get_all_websites()`
-    # - `update_website_status(id, status)`
 
-#set up logging
-logger = logging.getlogger(__name__)
+# Set up logging
+logger = logging.getLogger(__name__)
+
+# - `create_website(url, title, status)`
+# - `get_website(id)`
+# - `get_all_websites()`
+# - `update_website_status(id, status)`
 
 # Connection pool created once and reused
 _connection_pool = None
-
 def get_connection_pool():
 	"""Return a connection pool or create one
 	to return if one doesn't already exist"""
@@ -24,7 +26,13 @@ def get_connection_pool():
 				maxconn=10, #max connections in pool
 				dsn=DATABASE_URL,
 			)
-			logger.info("Database connection pool created")
+			# Register vector type adapter for pgvector on first connection
+			# This allows psycopg2 to automatically handle vector types
+			# register_vector() tells psycopg2 how to convert Python lists to PostgreSQL vector type
+			# conn = _connection_pool.getconn()
+			# register_vector(conn)
+			# _connection_pool.putconn(conn)
+			logger.info("Database connection pool created with vector support")
 		except Exception as e:
 			logger.error(f"Error creating connection pool: {e}")
 			raise
@@ -34,11 +42,16 @@ def get_connection_pool():
 def get_db_connection():
 	"""Context manager for database connections.
 	Automatically returns connection to pool and handles errors.
+	Registers vector adapter on each connection to ensure vector support.
 	"""
 	pool = get_connection_pool()
 	conn = None
 	try:
 		conn = pool.getconn()
+		# Register vector adapter for this connection
+		# register_vector() tells psycopg2 how to convert Python lists to PostgreSQL vector type
+		# This allows us to pass Python lists directly without manual string conversion
+		register_vector(conn)
 		yield conn #pauses this function to give conn to the caller
 	except Exception as e:
 		if conn:
@@ -91,7 +104,7 @@ def get_website(id):
 	try:
 		with get_db_cursor() as cursor:
 			cursor.execute("""
-				SELECT id, url, title, scraped_at, status, 
+				SELECT id, url, title, scraped_at, status
 				FROM websites WHERE id = %s;
 			""", (id,))
 			website = cursor.fetchone()
@@ -114,7 +127,7 @@ def get_all_websites():
 	try:
 		with get_db_cursor() as cursor:
 			cursor.execute("""
-				SELECT id, url, title, scraped_at, status,
+				SELECT id, url, title, scraped_at, status
 				FROM websites
 				ORDER BY scraped_at DESC;
 			""")
@@ -159,6 +172,8 @@ def update_website_status(id, status):
 def create_chunk(website_id, chunk_text, chunk_index, embedding, metadata):
 	"""Create a chunk record"""
 	try:
+		# With register_vector() called, we can pass Python lists directly
+		# psycopg2 will automatically convert them to PostgreSQL vector type
 		with get_db_cursor(commit=True) as cursor:
 			cursor.execute("""
 				INSERT INTO content_chunks (website_id, chunk_text, chunk_index, embedding, metadata)
@@ -179,7 +194,7 @@ def get_chunks_by_website(website_id):
 	try:
 		with get_db_cursor() as cursor:
 			cursor.execute("""
-				SELECT id, website_id, chunk_text, chunk_index, embedding, metadata,
+				SELECT id, website_id, chunk_text, chunk_index, metadata, created_at
 				FROM content_chunks WHERE website_id = %s
 				ORDER BY chunk_index;
 			""", (website_id,))
@@ -194,8 +209,8 @@ def get_chunks_by_website(website_id):
 						'website_id': c[1],
 						'chunk_text': c[2],
 						'chunk_index': c[3],
-						'embedding': c[4],
-						'metadata': c[5]
+						'metadata': c[4],
+						'created_at': c[5]
 					}
 				)
 
@@ -209,7 +224,7 @@ def get_chunk(id):
 	try:
 		with get_db_cursor() as cursor:
 			cursor.execute("""
-				SELECT id, website_id, chunk_text, chunk_index, metadata, 
+				SELECT id, website_id, chunk_text, chunk_index, metadata, created_at
 				FROM content_chunks WHERE id = %s;
 			""", (id,))
 			chunk = cursor.fetchone()
@@ -220,7 +235,8 @@ def get_chunk(id):
 				'website_id': chunk[1],
 				'chunk_text': chunk[2],
 				'chunk_index': chunk[3],
-				'metadata': chunk[4]
+				'metadata': chunk[4],
+				'created_at': chunk[5]
 			}
 			return chunk_data, None
 	except Exception as e:
@@ -229,12 +245,13 @@ def get_chunk(id):
 
 #vector similarity search
 def search_similar_chunks(query_embeddings, limit=5):
+	"""Search for similar chunks using vector similarity"""
 	try:
+		# With register_vector() called, we can pass Python lists directly
+		# psycopg2 will automatically convert them to PostgreSQL vector type
 		with get_db_cursor() as cursor:
-			""""Search for similar chunks using vector similarity"""
-			# embedding_type = '[]'
 			cursor.execute("""
-				SELECT id, website_id, chunk_text, chunk_index, metadata,
+				SELECT id, website_id, chunk_text, chunk_index, metadata, created_at,
 				embedding <=> %s::vector as distance
 				FROM content_chunks
 				WHERE embedding IS NOT NULL
@@ -253,10 +270,11 @@ def search_similar_chunks(query_embeddings, limit=5):
 						'chunk_text': c[2],
 						'chunk_index': c[3],
 						'metadata': c[4],
-						'distance': float(c[5])
+						'created_at': c[5],
+						'distance': float(c[6])
 					}
 				)
-			return chunks, None
+			return chunks_list, None
 	except Exception as e:
 		logger.error(f"Error searching similar chunks: {e}")
 		return None, f"Error searching similar chunks: {e}"
@@ -282,7 +300,7 @@ def get_conversation_history(conversation_id):
 	try:
 		with get_db_cursor() as cursor:
 			cursor.execute("""
-				SELECT id, conversation_id, message, sender, timestamp, 
+				SELECT id, conversation_id, message, sender, timestamp
 				FROM messages 
 				WHERE conversation_id = %s
 				ORDER BY timestamp ASC;
@@ -304,13 +322,12 @@ def get_conversation_history(conversation_id):
 			return messages_list, None
 	except Exception as e:
 		logger.error(f"Error getting conversation history: {e}")
-		return None, f"Error getting conversation historyL {e}"
-		
-	#Cleanup function (call on application shutdown)
-	def close_connection_pool():
-		"""Close all connections in the pool"""
-		global _connection_pool
-		if _connection_pool:
-			_connection_pool.closeall()
-			_connection_pool = None
-			logger.info("Database connection pool closed")
+		return None, f"Error getting conversation history: {e}"
+#Cleanup function (call on application shutdown)
+def close_connection_pool():
+	"""Close all connections in the pool"""
+	global _connection_pool
+	if _connection_pool:
+		_connection_pool.closeall()
+		_connection_pool = None
+		logger.info("Database connection pool closed")
