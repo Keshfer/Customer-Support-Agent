@@ -143,8 +143,9 @@ Based on the finAI.png reference image, the chat interface will feature:
 **Estimated Time**: 2-3 hours
 
 **Tasks**:
-- [ ] Create `backend/utils/text_processing.py`:
-  - `clean_html(html_content)` - Remove HTML tags, clean text
+<!--No need for clean_html. Firecrawl wil return clean md or json -->
+~~- [ ] Create `backend/utils/text_processing.py`:
+  - `clean_html(html_content)` - Remove HTML tags, clean text~~
   - `chunk_text(text, chunk_size=800, overlap=100)` - Split text into chunks
     - Split by paragraphs first
     - Then by sentences if needed
