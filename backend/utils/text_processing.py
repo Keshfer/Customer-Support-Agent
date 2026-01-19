@@ -1,4 +1,4 @@
-from langchain_text_splitters import CharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import tiktoken
 
 """- `chunk_text(text, chunk_size=800, overlap=100)` - Split text into chunks
@@ -10,7 +10,7 @@ def chunk_text(text, chunk_size=800, overlap=100):
 	"""Split text into chunks at fixed sizes with overlap"""
 	#https://docs.langchain.com/oss/python/integrations/splitters/split_by_token
 	chunks = []
-	splitter = CharacterTextSplitter.from_tiktoken_encoder(
+	splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
 		encoding_name="cl100k_base",
 		chunk_size=chunk_size, 
 		chunk_overlap=overlap)
@@ -20,5 +20,5 @@ def chunk_text(text, chunk_size=800, overlap=100):
 
 def count_tokens(text):
 	"""Count tokens of text"""
-	count = len(tiktoken.encoding_for_model("gpt-4o").encode(text))
+	count = len(tiktoken.get_encoding("cl100k_base").encode(text))
 	return count
