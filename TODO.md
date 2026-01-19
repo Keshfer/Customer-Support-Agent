@@ -61,16 +61,16 @@ This TODO list follows the implementation plan with alternating implementation a
 
 ### Text Processing Utilities
 
-- [ ] **Implement**: Create `backend/utils/text_processing.py`~~ with clean_html function~~
+- [x] **Implement**: Create `backend/utils/text_processing.py`~~ with clean_html function~~
 ~~- [ ] **Test**: Test with sample HTML string, verify HTML tags are removed~~
 - [x] **Implement**: Add chunk_text function with paragraph/sentence splitting
-- [ ] **Test**: Test with sample text, verify chunks are appropriate size (500-1000 tokens)
+- [x] **Test**: Test with sample text, verify chunks are appropriate size (500-1000 tokens)
 - [x] **Implement**: Add count_tokens function
-- [ ] **Test**: Test token counting with known text samples
+- [x] **Test**: Test token counting with known text samples
 - [x] **Implement**: Create `backend/utils/validators.py` with validate_url function
-- [ ] **Test**: Test with valid/invalid URLs, verify validation works correctly
+- [x] **Test**: Test with valid/invalid URLs, verify validation works correctly
 - [x] **Implement**: Add sanitize_input function
-- [ ] **Test**: Test with potentially harmful input, verify sanitization
+- [x] **Test**: Test with potentially harmful input, verify sanitization
 
 ### Firecrawl Scraping Service
 
