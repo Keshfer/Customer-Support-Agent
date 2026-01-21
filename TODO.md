@@ -74,14 +74,14 @@ This TODO list follows the implementation plan with alternating implementation a
 
 ### Firecrawl Scraping Service
 
-- [ ] **Implement**: Create `backend/services/scraping_service.py` with Firecrawl client initialization
-- [ ] **Test**: Test Firecrawl API connection with a simple URL
-- [ ] **Implement**: Add scrape_website function
-- [ ] **Test**: Scrape a test website (e.g., example.com), verify content is extracted
-- [ ] **Implement**: Add process_scraped_content function with chunking
-- [ ] **Test**: Process scraped content, verify it's chunked correctly
-- [ ] **Implement**: Add error handling and retry logic
-- [ ] **Test**: Test with invalid URL, verify error handling works
+- [x] **Implement**: Create `backend/services/scraping_service.py` with Firecrawl client initialization
+- [x] **Test**: Test Firecrawl API connection with a simple URL
+- [x] **Implement**: Add scrape_website function
+- [x] **Test**: Scrape a test website (e.g., example.com), verify content is extracted
+- [x] **Implement**: Add process_scraped_content function with chunking
+- [x] **Test**: Process scraped content, verify it's chunked correctly
+- [x] **Implement**: Add error handling and retry logic
+- [x] **Test**: Test with invalid URL, verify error handling works
 
 ### Embedding Service
 
