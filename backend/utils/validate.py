@@ -3,12 +3,12 @@ import validators
 from markupsafe import escape
 import re
 from urllib.parse import urlparse
-
+from typing import Optional
 """  - `validate_url(url)` - URL validation
   - `sanitize_input(text)` - Input sanitization
 """
 
-def validate_url(url):
+def validate_url(url) -> tuple[bool, Optional[str]]:
 	"""Validate url"""
 	
 	result = validators.url(url)
