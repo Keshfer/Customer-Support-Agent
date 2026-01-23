@@ -85,12 +85,12 @@ This TODO list follows the implementation plan with alternating implementation a
 
 ### Embedding Service
 
-- [ ] **Implement**: Create `backend/services/embedding_service.py` with OpenAI client
-- [ ] **Test**: Generate embedding for test text, verify it returns vector of correct dimension (1536)
-- [ ] **Implement**: Add generate_embeddings_batch function
-- [ ] **Test**: Generate embeddings for multiple chunks, verify batch processing works
-- [ ] **Implement**: Add caching mechanism
-- [ ] **Test**: Generate embedding twice for same text, verify second call uses cache
+- [x] **Implement**: Create `backend/services/embedding_service.py` with OpenAI client
+- [x] **Test**: Generate embedding for test text, verify it returns vector of correct dimension (1536)
+- [x] **Implement**: Add generate_embeddings_batch function
+- [x] **Test**: Generate embeddings for multiple chunks, verify batch processing works
+- [x] **Implement**: Add caching mechanism
+- [x] **Test**: Generate embedding twice for same text, verify second call uses cache
 
 ### OpenAI Service & Prompts
 
