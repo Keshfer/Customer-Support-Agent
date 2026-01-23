@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS content_chunks (
     website_id INTEGER REFERENCES websites(id) ON DELETE CASCADE,
     chunk_text TEXT NOT NULL,
     chunk_index INTEGER,
-    embedding vector(1536), -- OpenAI ada-002 dimension
+    embedding vector(1536), -- OpenAI ada-002 and text-embedding-3-small dimension
     metadata JSONB, -- Additional metadata
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
