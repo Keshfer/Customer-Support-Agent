@@ -206,12 +206,15 @@ Based on the finAI.png reference image, the chat interface will feature:
 - [ ] Create `backend/services/prompts.py`:
   - System prompt template for customer support agent
   - Prompt formatting functions:
-    - `format_chat_prompt(context_chunks, conversation_history, user_question)`
-    - `format_scraping_confirmation_prompt(website_title)`
+    - `format_chat_prompt()` - Returns system prompt/instructions (no parameters)
+    - `format_scraping_confirmation_prompt(website_title)` - Returns confirmation message prompt
 - [ ] Create `backend/services/openai_service.py`:
   - Initialize OpenAI client
-  - `generate_response(prompt, conversation_history=None)`:
-    - Send prompt to GPT-4 or GPT-3.5-turbo
+  - `generate_response(conversation_history=None)`:
+    - Get system prompt from format_chat_prompt()
+    - Pass system prompt to 'instructions' parameter
+    - Pass conversation_history to 'input' parameter
+    - Send to OpenAI Responses API
     - Handle streaming (optional)
     - Error handling and retries
   - `generate_embedding(text)` - Wrapper for embedding service
@@ -267,8 +270,7 @@ Based on the finAI.png reference image, the chat interface will feature:
     - Generate embedding for user question
     - Perform vector similarity search to find relevant chunks
     - Retrieve conversation history
-    - Format prompt with context and history
-    - Call OpenAI service to generate response
+    - Call OpenAI service to generate response (system prompt and conversation history handled separately)
     - Save agent response to database
     - Return response with conversation_id
   - Error handling and logging

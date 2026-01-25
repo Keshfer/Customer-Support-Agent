@@ -94,16 +94,16 @@ This TODO list follows the implementation plan with alternating implementation a
 
 ### OpenAI Service & Prompts
 
-- [ ] **Implement**: Create `backend/services/prompts.py` with system prompt template
-- [ ] **Test**: Format test prompt, verify structure is correct
-- [ ] **Implement**: Add format_chat_prompt function
-- [ ] **Test**: Format prompt with sample context, history, and question, verify format
-- [ ] **Implement**: Add format_scraping_confirmation_prompt function
-- [ ] **Test**: Format confirmation prompt, verify format
-- [ ] **Implement**: Create `backend/services/openai_service.py` with generate_response function
-- [ ] **Test**: Generate response with test prompt, verify response is received
-- [ ] **Implement**: Add error handling and retries
-- [ ] **Test**: Test with invalid API key, verify error handling
+- [x] **Implement**: Create `backend/services/prompts.py` with system prompt template
+- [x] **Test**: Format test prompt, verify structure is correct
+- [x] **Implement**: Add format_chat_prompt function
+- [x] **Test**: Format prompt (system prompt only), verify it returns correct instructions
+- [x] **Implement**: Add format_scraping_confirmation_prompt function
+- [x] **Test**: Format confirmation prompt, verify format
+- [x] **Implement**: Create `backend/services/openai_service.py` with generate_response function
+- [x] **Test**: Generate response with test prompt, verify response is received
+- [x] **Implement**: Add error handling and retries
+- [x] **Test**: Test with invalid API key, verify error handling
 
 ---
 
