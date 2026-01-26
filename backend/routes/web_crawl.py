@@ -14,15 +14,19 @@
 #   - `GET /api/websites/:id`:
 #     - Return website details and associated chunks
 
-from crypt import methods
 import datetime
 from flask import Blueprint, jsonify, request
-from backend.services.database_service import create_chunk, create_website
+from backend.services.database_service import (
+	create_chunk_by_url, 
+	create_website, 
+	update_website_status_by_url,
+	update_website_title_by_url,
+	get_website_by_url
+)
 from backend.services.scraping_service import scrape_website, process_scraped_content
 from backend.services.embedding_service import generate_embedding, generate_embeddings_batch
 from backend.utils.validate import validate_url
 import logging
-from backend.services.database_service import update_website_status
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -60,6 +64,11 @@ def scrap_website():
 		if not url_valid:
 			return jsonify({'error': 'Invalid URL'}), 400
 
+		# Check if website already exists
+		existing_website, _ = get_website_by_url(url)
+		if existing_website and existing_website['status'] != 'failed':
+			return jsonify({'error': 'Website already exists', 'url': url}), 409
+		
 		#create website record with 'pending' status
 		website_id, error = create_website(url, None, "pending")
 		if error:
@@ -68,24 +77,31 @@ def scrap_website():
 		#call scraping_service to fetch content
 		content_json = scrape_website(url)
 		if 'error' in content_json:
+			# Update status to 'failed' if scraping fails
+			update_website_status_by_url(url, "failed")
 			return jsonify({'error': content_json['error']}), 500
+		
 		website_title = content_json['website_title']
 		markdown_content = content_json['markdown_content']
-		scraped_at = datetime.now().isoformat()
+		scraped_at = datetime.datetime.now().isoformat()
+		
 		#update website record with actual title
-		status, error = update_website_status(website_id, "completed")
+		success, error = update_website_title_by_url(url, website_title)
 		if error:
-			return jsonify({'error': error}), 500
-
+			logger.warning(f"Failed to update website title: {error}")
+		
 		#chunk content
-		chunks =  process_scraped_content(markdown_content, chunk_size=800, overlap=100)
+		chunks = process_scraped_content(markdown_content, chunk_size=800, overlap=100)
 		if chunks is None:
+			update_website_status_by_url(url, "failed")
 			return jsonify({'error': 'Failed to chunk content'}), 500
 
 		#generate embeddings for chunks
 		embeddings = generate_embeddings_batch(chunks)
 		if embeddings is None:
+			update_website_status_by_url(url, "failed")
 			return jsonify({'error': 'Failed to generate embeddings'}), 500
+		
 		#store chunks with embeddings in database
 		error_count = 0
 		for i, chunk in enumerate(chunks):
@@ -94,14 +110,27 @@ def scrap_website():
 				'url': url,
 				'scraped_at': scraped_at
 			}
-			chunk_id, error = create_chunk(website_id, chunk, i, embeddings[i], metadata)
+			chunk_id, error = create_chunk_by_url(url, chunk, i, embeddings[i], metadata)
 			if error:
-				logger.error(f"Error creating chunk: {error}")
+				logger.error(f"Error creating chunk {i}: {error}")
 				error_count += 1
+		
 		if error_count > 0:
+			update_website_status_by_url(url, "failed")
 			return jsonify({'error': f'Failed to store {error_count} chunks'}), 500
-		else:
-			return jsonify({'message': 'Website scraped and chunks stored successfully'}), 200
+		
+		#update website status to 'completed'
+		success, error = update_website_status_by_url(url, "completed")
+		if error:
+			logger.warning(f"Failed to update website status: {error}")
+		
+		# Get the final website data to return
+		website_data, _ = get_website_by_url(url)
+		
+		return jsonify({
+			'message': 'Website scraped and chunks stored successfully',
+			'website': website_data
+		}), 200
 	except Exception as e:
 		logger.error(f"Error scraping website: {e}")
 		return jsonify({'error': 'Failed to scrape website'}), 500

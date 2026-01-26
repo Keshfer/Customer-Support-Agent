@@ -28,12 +28,14 @@ from services.database_service import (
     get_connection_pool,
     get_db_connection,
     create_website,
-    get_website,
+    get_website_by_url,
+    get_website_by_title,
     get_all_websites,
-    update_website_status,
-    create_chunk,
-    get_chunks_by_website,
-    get_chunk,
+    update_website_status_by_url,
+    update_website_title_by_url,
+    create_chunk_by_url,
+    get_chunks_by_website_url,
+    get_chunk_by_url_and_index,
     search_similar_chunks,
     save_message,
     get_conversation_history,
@@ -41,7 +43,7 @@ from services.database_service import (
 )
 
 # Test data storage (to clean up after tests)
-_test_website_ids = []
+_test_website_urls = []  # Track URLs instead of IDs
 _test_chunk_ids = []
 _test_conversation_id = "test_conv_12345"
 
@@ -78,9 +80,9 @@ def cleanup_test_data():
             print_success(f"Deleted {len(_test_chunk_ids)} test chunks")
         
         # Delete test websites (cascades to chunks)
-        if _test_website_ids:
-            cursor.execute("DELETE FROM websites WHERE id = ANY(%s);", (_test_website_ids,))
-            print_success(f"Deleted {len(_test_website_ids)} test websites")
+        if _test_website_urls:
+            cursor.execute("DELETE FROM websites WHERE url = ANY(%s);", (_test_website_urls,))
+            print_success(f"Deleted {len(_test_website_urls)} test websites")
         
         # Delete test messages
         cursor.execute("DELETE FROM messages WHERE conversation_id = %s;", (_test_conversation_id,))
@@ -148,13 +150,15 @@ def test_website_operations():
     
     Tests:
     - create_website(): Creates a new website record, returns (id, None) on success
-    - get_website(): Retrieves website by ID, returns (dict, None) on success
+    - get_website_by_url(): Retrieves website by URL, returns (dict, None) on success
+    - get_website_by_title(): Retrieves website by title, returns (dict, None) on success
     - get_all_websites(): Gets all websites, returns (list, None) on success
-    - update_website_status(): Updates website status, returns (True, None) on success
+    - update_website_status_by_url(): Updates website status by URL, returns (True, None) on success
+    - update_website_title_by_url(): Updates website title by URL, returns (True, None) on success
     """
     print_test_header("Website CRUD Operations")
     
-    global _test_website_ids
+    global _test_website_urls
     
     try:
         # Test 2.1: Create website
@@ -166,11 +170,11 @@ def test_website_operations():
         assert error is None, f"Should not have error: {error}"
         assert website_id is not None, "Website ID should not be None"
         assert isinstance(website_id, int), "Website ID should be an integer"
-        _test_website_ids.append(website_id)
-        print_success(f"Created website with ID: {website_id}")
+        _test_website_urls.append(test_url)
+        print_success(f"Created website with URL: {test_url}")
         
-        # Test 2.2: Retrieve website by ID
-        website_data, error = get_website(website_id)
+        # Test 2.2: Retrieve website by URL
+        website_data, error = get_website_by_url(test_url)
         assert error is None, f"Should not have error: {error}"
         assert website_data is not None, "Website data should not be None"
         assert website_data['id'] == website_id, "Website ID should match"
@@ -178,7 +182,14 @@ def test_website_operations():
         assert website_data['title'] == test_title, "Title should match"
         assert website_data['status'] == test_status, "Status should match"
         print(f"Scraped at {website_data['scraped_at']}")
-        print_success("Retrieved website and verified all fields")
+        print_success("Retrieved website by URL and verified all fields")
+        
+        # Test 2.2b: Retrieve website by title
+        website_data_by_title, error = get_website_by_title(test_title)
+        assert error is None, f"Should not have error: {error}"
+        assert website_data_by_title is not None, "Website data should not be None"
+        assert website_data_by_title['url'] == test_url, "URL should match when retrieved by title"
+        print_success("Retrieved website by title and verified URL matches")
         
         # Test 2.3: Get all websites
         all_websites, error = get_all_websites()
@@ -190,27 +201,38 @@ def test_website_operations():
         # Verify our test website is in the list
         found = False
         for w in all_websites:
-            if w['id'] == website_id:
+            if w['url'] == test_url:
                 found = True
-                assert w['url'] == test_url, "URL should match in list"
+                assert w['title'] == test_title, "Title should match in list"
                 break
         assert found, "Test website should be in the list"
         print_success(f"Retrieved all websites ({len(all_websites)} total)")
         
-        # Test 2.4: Update website status
+        # Test 2.4: Update website status by URL
         new_status = "completed"
-        success, error = update_website_status(website_id, new_status)
+        success, error = update_website_status_by_url(test_url, new_status)
         assert error is None, f"Should not have error: {error}"
         assert success is True, "Update should return True"
         
         # Verify status was updated
-        updated_website, error = get_website(website_id)
+        updated_website, error = get_website_by_url(test_url)
         assert updated_website['status'] == new_status, "Status should be updated to completed"
         print_success(f"Updated website status to: {new_status}")
         
-        # Test 2.5: Test error handling - get non-existent website
-        fake_id = 999999
-        website_data, error = get_website(fake_id)
+        # Test 2.5: Update website title by URL
+        new_title = "Updated Test Website"
+        success, error = update_website_title_by_url(test_url, new_title)
+        assert error is None, f"Should not have error: {error}"
+        assert success is True, "Title update should return True"
+        
+        # Verify title was updated
+        updated_website, error = get_website_by_url(test_url)
+        assert updated_website['title'] == new_title, "Title should be updated"
+        print_success(f"Updated website title to: {new_title}")
+        
+        # Test 2.6: Test error handling - get non-existent website
+        fake_url = "https://fake-nonexistent-website-12345.com"
+        website_data, error = get_website_by_url(fake_url)
         assert website_data is None, "Should return None for non-existent website"
         assert error is not None, "Should return error message"
         assert "not found" in error.lower(), "Error should mention not found"
@@ -231,21 +253,22 @@ def test_website_operations():
 
 def test_chunk_operations():
     """
-    Test creating chunks and retrieving them by website_id.
+    Test creating chunks and retrieving them by website URL.
     
     Tests:
-    - create_chunk(): Creates a content chunk with embedding, returns (id, None)
-    - get_chunks_by_website(): Gets all chunks for a website, returns (list, None)
-    - get_chunk(): Gets a single chunk by ID, returns (dict, None)
+    - create_chunk_by_url(): Creates a content chunk with embedding by URL, returns (id, None)
+    - get_chunks_by_website_url(): Gets all chunks for a website by URL, returns (list, None)
+    - get_chunk_by_url_and_index(): Gets a single chunk by URL and index, returns (dict, None)
     """
     print_test_header("Content Chunk Operations")
     
-    global _test_chunk_ids, _test_website_ids
+    global _test_chunk_ids, _test_website_urls
     
     try:
         # First, create a test website
-        website_id, _ = create_website("https://chunk-test.com", "Chunk Test Site", "completed")
-        _test_website_ids.append(website_id)
+        test_url = "https://chunk-test.com"
+        website_id, _ = create_website(test_url, "Chunk Test Site", "completed")
+        _test_website_urls.append(test_url)
         
         # Test 3.1: Create chunk with embedding
         # Create a sample embedding vector (1536 dimensions for OpenAI ada-002)
@@ -256,8 +279,8 @@ def test_chunk_operations():
         test_chunk_index = 0
         test_metadata = json.dumps({"source": "test", "type": "paragraph"})
         
-        chunk_id, error = create_chunk(
-            website_id, 
+        chunk_id, error = create_chunk_by_url(
+            test_url, 
             test_chunk_text, 
             test_chunk_index, 
             test_embedding, 
@@ -271,8 +294,8 @@ def test_chunk_operations():
         
         # Test 3.2: Create another chunk for the same website
         test_chunk_text2 = "This is another test chunk for the same website."
-        chunk_id2, error = create_chunk(
-            website_id,
+        chunk_id2, error = create_chunk_by_url(
+            test_url,
             test_chunk_text2,
             1,  # chunk_index
             [0.2] * 1536,  # Different embedding
@@ -282,8 +305,8 @@ def test_chunk_operations():
         _test_chunk_ids.append(chunk_id2)
         print_success(f"Created second chunk with ID: {chunk_id2}")
         
-        # Test 3.3: Get chunks by website_id
-        chunks, error = get_chunks_by_website(website_id)
+        # Test 3.3: Get chunks by website URL
+        chunks, error = get_chunks_by_website_url(test_url)
         assert error is None, f"Should not have error: {error}"
         assert chunks is not None, "Chunks list should not be None"
         assert isinstance(chunks, list), "Should return a list"
@@ -310,18 +333,17 @@ def test_chunk_operations():
         assert found_chunk2, "Second chunk should be in the list"
         print_success(f"Retrieved {len(chunks)} chunks for website")
         
-        # Test 3.4: Get single chunk by ID
-        chunk_data, error = get_chunk(chunk_id)
+        # Test 3.4: Get single chunk by URL and index
+        chunk_data, error = get_chunk_by_url_and_index(test_url, test_chunk_index)
         assert error is None, f"Should not have error: {error}"
         assert chunk_data is not None, "Chunk data should not be None"
-        assert chunk_data['id'] == chunk_id, "Chunk ID should match"
+        assert chunk_data['chunk_index'] == test_chunk_index, "Chunk index should match"
         assert chunk_data['chunk_text'] == test_chunk_text, "Chunk text should match"
-        assert chunk_data['website_id'] == website_id, "Website ID should match"
-        print_success("Retrieved single chunk by ID and verified data")
+        print_success("Retrieved single chunk by URL and index and verified data")
         
         # Test 3.5: Test error handling - get chunks for non-existent website
-        fake_website_id = 999999
-        chunks, error = get_chunks_by_website(fake_website_id)
+        fake_url = "https://fake-nonexistent-website-99999.com"
+        chunks, error = get_chunks_by_website_url(fake_url)
         assert chunks is None or len(chunks) == 0 or error is not None, "Should handle non-existent website"
         print_success("Error handling works for non-existent website")
         
@@ -350,18 +372,19 @@ def test_vector_similarity_search():
     """
     print_test_header("Vector Similarity Search")
     
-    global _test_chunk_ids, _test_website_ids
+    global _test_chunk_ids, _test_website_urls
     
     try:
         # Create a test website
-        website_id, _ = create_website("https://vector-test.com", "Vector Test", "completed")
-        _test_website_ids.append(website_id)
+        test_url = "https://vector-test.com"
+        website_id, _ = create_website(test_url, "Vector Test", "completed")
+        _test_website_urls.append(test_url)
         
         # Create multiple chunks with different embeddings
         # Embedding 1: All 0.1s (will be our query target)
         target_embedding = [0.1] * 1536
-        chunk1_id, _ = create_chunk(
-            website_id,
+        chunk1_id, _ = create_chunk_by_url(
+            test_url,
             "This chunk has embedding with all 0.1 values",
             0,
             target_embedding,
@@ -370,8 +393,8 @@ def test_vector_similarity_search():
         _test_chunk_ids.append(chunk1_id)
         
         # Embedding 2: All 0.2s (less similar)
-        chunk2_id, _ = create_chunk(
-            website_id,
+        chunk2_id, _ = create_chunk_by_url(
+            test_url,
             "This chunk has embedding with all 0.2 values",
             1,
             [0.2] * 1536,
@@ -380,8 +403,8 @@ def test_vector_similarity_search():
         _test_chunk_ids.append(chunk2_id)
         
         # Embedding 3: All 0.9s (very different)
-        chunk3_id, _ = create_chunk(
-            website_id,
+        chunk3_id, _ = create_chunk_by_url(
+            test_url,
             "This chunk has embedding with all 0.9 values",
             2,
             [0.9] * 1536,
@@ -409,10 +432,19 @@ def test_vector_similarity_search():
         print_success("Chunks are correctly ordered by similarity")
         
         # Test 4.3: Verify the most similar chunk is our target
-        print(chunk1_id)
-        print(similar_chunks)
-        most_similar = similar_chunks[2] # indices 0 and 1 are from testing chunk operations. Index 2 is the first chunk added by test_vector_similarity_search
-        assert most_similar['id'] == chunk1_id, "Most similar should be chunk with target embedding"
+        # Find the chunk with chunk_index 0 (our target chunk)
+        most_similar = None
+        for chunk in similar_chunks:
+            if chunk.get('chunk_index') == 0 and "0.1 values" in chunk.get('chunk_text', ''):
+                most_similar = chunk
+                break
+        
+        # If not found by index, check the first few results
+        if not most_similar and len(similar_chunks) > 0:
+            most_similar = similar_chunks[0]
+        
+        assert most_similar is not None, "Should find the target chunk"
+        assert "0.1 values" in most_similar.get('chunk_text', ''), "Most similar should be chunk with target embedding"
         assert most_similar['distance'] < 0.1, "Distance to identical embedding should be very small"
         print_success("Most similar chunk is correctly identified")
         

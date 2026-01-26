@@ -53,6 +53,7 @@ def _get_embedding_from_db(text: str) -> Optional[list[float]]:
 					logger.warning(f"Unexpected embedding format or dimension: {type(embedding)}, length: {len(embedding) if isinstance(embedding, list) else 'N/A'}")
 	except Exception as e:
 		logger.warning(f"Error getting embedding from database: {e}")
+	logger.info(f"no embedding found for text: {text}")
 	return None
 
 def _generate_embedding_from_api(text: str) -> Optional[list[float]]:
