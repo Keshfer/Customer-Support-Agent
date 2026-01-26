@@ -9,7 +9,7 @@ from typing import Optional
 """
 
 def validate_url(url) -> tuple[bool, Optional[str]]:
-	"""Validate url"""
+	"""Validate url, determining if the website is real"""
 	
 	result = validators.url(url)
 	if result != True:

@@ -111,14 +111,14 @@ This TODO list follows the implementation plan with alternating implementation a
 
 ### Website Scraping Routes
 
-- [ ] **Implement**: Create `backend/routes/web_crawl.py` blueprint
-- [ ] **Implement**: Add `POST /api/websites/scrape` endpoint with full flow
+- [x] **Implement**: Create `backend/routes/web_crawl.py` blueprint
+- [x] **Implement**: Add `POST /api/websites/scrape` endpoint with full flow
 - [ ] **Test**: Send POST request to scrape a test website, verify:
   - Website record is created in database
   - Chunks are stored with embeddings
   - Response includes website_id and LLM message
-- [ ] **Implement**: Add `GET /api/websites` endpoint
-- [ ] **Test**: Send GET request, verify list of websites is returned
+~~- [ ] **Implement**: Add `GET /api/websites` endpoint
+- [ ] **Test**: Send GET request, verify list of websites is returned~~
 - [ ] **Implement**: Add `GET /api/websites/:id` endpoint
 - [ ] **Test**: Send GET request with ID, verify website and chunks are returned
 - [ ] **Implement**: Register blueprint in `app.py`
