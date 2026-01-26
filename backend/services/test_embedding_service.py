@@ -40,7 +40,7 @@ from services.embedding_service import (
     openai
 )
 from config import OPENAI_API_KEY
-from services.database_service import create_chunk, create_website, get_db_cursor, close_connection_pool
+from services.database_service import create_chunk_by_url, create_website, get_db_cursor, close_connection_pool
 
 # ============================================================================
 # TEST HELPER FUNCTIONS
@@ -94,7 +94,7 @@ def print_warning(message):
     print(f"⚠ {message}")
 
 # Test data storage (to clean up after tests)
-_test_website_ids = []
+_test_website_urls = []  # Track URLs instead of IDs
 _test_chunk_ids = []
 
 def cleanup_test_data():
@@ -116,9 +116,9 @@ def cleanup_test_data():
             print_success(f"Deleted {len(_test_chunk_ids)} test chunks")
         
         # Delete test websites (cascades to chunks)
-        if _test_website_ids:
-            cursor.execute("DELETE FROM websites WHERE id = ANY(%s);", (_test_website_ids,))
-            print_success(f"Deleted {len(_test_website_ids)} test websites")
+        if _test_website_urls:
+            cursor.execute("DELETE FROM websites WHERE url = ANY(%s);", (_test_website_urls,))
+            print_success(f"Deleted {len(_test_website_urls)} test websites")
         
         conn.commit()
         cursor.close()
@@ -315,7 +315,7 @@ def test_database_caching():
     """
     print_test_header("Database Caching")
     
-    global _test_website_ids, _test_chunk_ids
+    global _test_website_urls, _test_chunk_ids
     
     try:
         # Check if API key is available
@@ -338,15 +338,16 @@ def test_database_caching():
         print_success("Generated test embedding")
         
         # Create test website
-        website_id, error = create_website("https://test-cache.example.com", "Test Cache Site", "completed")
+        test_url = "https://test-cache.example.com"
+        website_id, error = create_website(test_url, "Test Cache Site", "completed")
         assert error is None, f"Should create website: {error}"
-        _test_website_ids.append(website_id)
-        print_success(f"Created test website (ID: {website_id})")
+        _test_website_urls.append(test_url)
+        print_success(f"Created test website (URL: {test_url})")
         
         # Create chunk with embedding in database
         import json
-        chunk_id, error = create_chunk(
-            website_id,
+        chunk_id, error = create_chunk_by_url(
+            test_url,
             test_text,  # Same text we generated embedding for
             0,  # chunk_index
             test_embedding,  # The embedding we just generated
@@ -575,7 +576,7 @@ def test_complete_workflow():
     """
     print_test_header("Integration Test: Complete Workflow")
     
-    global _test_website_ids, _test_chunk_ids
+    global _test_website_urls, _test_chunk_ids
     
     try:
         # Check if API key is available
@@ -603,11 +604,13 @@ def test_complete_workflow():
         
         # Step 3: Store in database
         print_info("Step 3: Storing embedding in database")
-        website_id, _ = create_website("https://workflow-test.example.com", "Workflow Test", "completed")
-        _test_website_ids.append(website_id)
+        test_url = "https://workflow-test.example.com"
+        website_id, _ = create_website(test_url, "Workflow Test", "completed")
+        _test_website_urls.append(test_url)
         
         import json
-        chunk_id, _ = create_chunk(website_id, test_text, 0, embedding1, json.dumps({"source": "test"}))
+        chunk_id, _ = create_chunk_by_url(test_url, test_text, 0, embedding1, json.dumps({"source": "test"}))
+        #chunk_id, _ = create_chunk_by_url(test_url, test_text, 0, embedding1, {"source": "test"})
         _test_chunk_ids.append(chunk_id)
         print_success("Step 3: Embedding stored in database")
         

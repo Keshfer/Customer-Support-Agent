@@ -9,9 +9,14 @@ from contextlib import contextmanager
 logger = logging.getLogger(__name__)
 
 # - `create_website(url, title, status)`
-# - `get_website(id)`
+# - `get_website_by_url(url)` - Get website by URL
+# - `get_website_by_title(title)` - Get website by title
 # - `get_all_websites()`
-# - `update_website_status(id, status)`
+# - `update_website_status_by_url(url, status)` - Update status by URL
+# - `update_website_title_by_url(url, title)` - Update title by URL
+
+
+"""IMPORTANT: Database schema unchanged: foreign keys still use IDs internally"""
 
 # Connection pool created once and reused
 _connection_pool = None
@@ -99,14 +104,14 @@ def create_website(url, title, status):
 		logger.error(f"Error creating website: {e}")
 		return None, f"Error creating website: {e}"
 
-def get_website(id):
-	"""Return website by id"""
+def get_website_by_url(url):
+	"""Return website by URL"""
 	try:
 		with get_db_cursor() as cursor:
 			cursor.execute("""
 				SELECT id, url, title, scraped_at, status
-				FROM websites WHERE id = %s;
-			""", (id,))
+				FROM websites WHERE url = %s;
+			""", (url,))
 			website = cursor.fetchone()
 			if not website:
 				return None, "Website not found"
@@ -119,8 +124,33 @@ def get_website(id):
 			}
 			return website_data, None
 	except Exception as e:
-		logger.error(f"Error getting website: {e}")
-		return None, f"Error getting website: {e}"
+		logger.error(f"Error getting website by URL: {e}")
+		return None, f"Error getting website by URL: {e}"
+
+def get_website_by_title(title):
+	"""Return website by title (returns first match if multiple exist)"""
+	try:
+		with get_db_cursor() as cursor:
+			cursor.execute("""
+				SELECT id, url, title, scraped_at, status
+				FROM websites WHERE title = %s
+				ORDER BY scraped_at DESC
+				LIMIT 1;
+			""", (title,))
+			website = cursor.fetchone()
+			if not website:
+				return None, "Website not found"
+			website_data = {
+				'id': website[0],
+				'url': website[1],
+				'title': website[2],
+				'scraped_at': website[3],
+				'status': website[4]
+			}
+			return website_data, None
+	except Exception as e:
+		logger.error(f"Error getting website by title: {e}")
+		return None, f"Error getting website by title: {e}"
 
 def get_all_websites():
 	"""Get all websites."""
@@ -150,14 +180,13 @@ def get_all_websites():
 		logger.error(f"Error getting all websites: {e}")
 		return None, f"Error getting all websites: {e}"
 
-def update_website_status(id, status):
-	"""Update status of a website by id"""
-	#note: change code to rollback if error occurs
+def update_website_status_by_url(url, status):
+	"""Update status of a website by URL"""
 	try:
-		with get_db_cursor(True) as cursor:
+		with get_db_cursor(commit=True) as cursor:
 			cursor.execute("""
-				UPDATE websites SET status = %s WHERE id = %s;
-			""", (status, id))
+				UPDATE websites SET status = %s WHERE url = %s;
+			""", (status, url))
 			#check to make sure that there is a website that got updated
 			if cursor.rowcount == 0:
 				return False, "Website not found"
@@ -166,13 +195,36 @@ def update_website_status(id, status):
 		logger.error(f"Error updating website status: {e}")
 		return False, f"Error updating website status: {e}"
 
-#CRUD operations for content_chunks
-    # - `create_chunk(website_id, chunk_text, chunk_index, embedding, metadata)`
-    # - `get_chunks_by_website(website_id)`
-    # - `get_chunk(id)`
-def create_chunk(website_id, chunk_text, chunk_index, embedding, metadata):
-	"""Create a chunk record"""
+def update_website_title_by_url(url, title):
+	"""Update title of a website by URL"""
 	try:
+		with get_db_cursor(commit=True) as cursor:
+			cursor.execute("""
+				UPDATE websites SET title = %s WHERE url = %s;
+			""", (title, url))
+			#check to make sure that there is a website that got updated
+			if cursor.rowcount == 0:
+				return False, "Website not found"
+			return True, None
+	except Exception as e:
+		logger.error(f"Error updating website title: {e}")
+		return False, f"Error updating website title: {e}"
+
+#CRUD operations for content_chunks
+    # - `create_chunk_by_url(url, chunk_text, chunk_index, embedding, metadata)`
+    # - `get_chunks_by_website_url(url)`
+    # - `get_chunk_by_url_and_index(url, chunk_index)`
+
+def create_chunk_by_url(url, chunk_text, chunk_index, embedding, metadata):
+	"""Create a chunk record by website URL"""
+	try:
+		# First, get the website_id from the URL
+		website_data, error = get_website_by_url(url)
+		if error or not website_data:
+			return None, f"Website not found: {error}"
+		
+		website_id = website_data['id']
+		
 		# With register_vector() called, we can pass Python lists directly
 		# psycopg2 will automatically convert them to PostgreSQL vector type
 		with get_db_cursor(commit=True) as cursor:
@@ -190,9 +242,16 @@ def create_chunk(website_id, chunk_text, chunk_index, embedding, metadata):
 		logger.error(f"Error creating chunk: {e}")
 		return None, f"Error creating chunk: {e}"
 
-def get_chunks_by_website(website_id):
-	"""Get all chunks for a website"""
+def get_chunks_by_website_url(url):
+	"""Get all chunks for a website by URL"""
 	try:
+		# First, get the website_id from the URL
+		website_data, error = get_website_by_url(url)
+		if error or not website_data:
+			return None, f"Website not found: {error}"
+		
+		website_id = website_data['id']
+		
 		with get_db_cursor() as cursor:
 			cursor.execute("""
 				SELECT id, website_id, chunk_text, chunk_index, metadata, created_at
@@ -217,11 +276,43 @@ def get_chunks_by_website(website_id):
 
 			return chunks_list, None
 	except Exception as e:
-		logger.error(f"Error getting chunks by website: {e}")
-		return None, f"Error getting chunks by website: {e}"
+		logger.error(f"Error getting chunks by website URL: {e}")
+		return None, f"Error getting chunks by website URL: {e}"
 
+def get_chunk_by_url_and_index(url, chunk_index):
+	"""Get a specific chunk by website URL and chunk index"""
+	try:
+		# First, get the website_id from the URL
+		website_data, error = get_website_by_url(url)
+		if error or not website_data:
+			return None, f"Website not found: {error}"
+		
+		website_id = website_data['id']
+		
+		with get_db_cursor() as cursor:
+			cursor.execute("""
+				SELECT id, website_id, chunk_text, chunk_index, metadata, created_at
+				FROM content_chunks WHERE website_id = %s AND chunk_index = %s;
+			""", (website_id, chunk_index))
+			chunk = cursor.fetchone()
+			if not chunk:
+				return None, "Chunk not found"
+			chunk_data = {
+				'id': chunk[0],
+				'website_id': chunk[1],
+				'chunk_text': chunk[2],
+				'chunk_index': chunk[3],
+				'metadata': chunk[4],
+				'created_at': chunk[5]
+			}
+			return chunk_data, None
+	except Exception as e:
+		logger.error(f"Error getting chunk by URL and index: {e}")
+		return None, f"Error getting chunk by URL and index: {e}"
+
+# Keep get_chunk for backward compatibility, but prefer get_chunk_by_url_and_index
 def get_chunk(id):
-	"""Get a chunk by id"""
+	"""Get a chunk by id (deprecated - use get_chunk_by_url_and_index instead)"""
 	try:
 		with get_db_cursor() as cursor:
 			cursor.execute("""
