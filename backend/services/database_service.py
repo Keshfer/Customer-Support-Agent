@@ -152,6 +152,7 @@ def get_all_websites():
 
 def update_website_status(id, status):
 	"""Update status of a website by id"""
+	#note: change code to rollback if error occurs
 	try:
 		with get_db_cursor(True) as cursor:
 			cursor.execute("""

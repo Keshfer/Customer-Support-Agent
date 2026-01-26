@@ -54,8 +54,6 @@ def scrape_website(url: str, attempts: int = 3) -> Optional[dict]:
 			return return_json
 
 		except Exception as e:
-
-
 			logger.error(f"Error scraping website: {e}")
 			counter += 1
 			time.sleep(1)
