@@ -1,9 +1,9 @@
 from openai import OpenAI
-from config import OPENAI_API_KEY
+from backend.config import OPENAI_API_KEY
 from typing import Optional
 import logging
 from functools import lru_cache
-from services.database_service import get_db_cursor
+from backend.services.database_service import get_db_cursor
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
