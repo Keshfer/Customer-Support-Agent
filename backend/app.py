@@ -1,6 +1,12 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import config
+import logging
+from routes.web_crawl import crawl_bp
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -17,11 +23,20 @@ def health_check():
     """Health check endpoint to verify server is running."""
     return jsonify({"status": "healthy"}), 200
 
-# TODO: Register blueprints here when routes are created
+# Register blueprints for route modules
+# Blueprints allow us to organize routes into separate modules
+try:
+	# Import and register website scraping routes
+	app.register_blueprint(crawl_bp, url_prefix='/api')
+	logger.info("Registered web_crawl blueprint")
+except ImportError as e:
+	# Log warning if blueprint can't be imported (e.g., during initial setup)
+	logger = logging.getLogger(__name__)
+	logger.warning(f"Could not import web_crawl blueprint: {e}")
+
+# TODO: Register chat blueprint when it's created
 # from routes.chat import chat_bp
-# from routes.web_crawl import web_crawl_bp
 # app.register_blueprint(chat_bp, url_prefix='/api')
-# app.register_blueprint(web_crawl_bp, url_prefix='/api')
 
 if __name__ == '__main__':
     # Validate configuration before starting
