@@ -130,18 +130,18 @@ This TODO list follows the implementation plan with alternating implementation a
 
 ### Chat Routes
 
-- [ ] **Implement**: Create `backend/routes/chat.py` blueprint
-- [ ] **Implement**: Add `POST /api/chat/message` endpoint with full flow
-- [ ] **Test**: Send POST request with message, verify:
+- [x] **Implement**: Create `backend/routes/chat.py` blueprint
+- [x] **Implement**: Add `POST /api/chat/message` endpoint with full flow
+- [x] **Test**: Send POST request with message, verify:
   - User message is saved to database
   - Relevant chunks are retrieved
   - AI response is generated and saved
   - Response includes conversation_id
-- [ ] **Implement**: Register blueprint in `app.py`
-- [ ] **Test**: Verify chat endpoint is accessible
-- [ ] **Implement**: Add request validation
-- [ ] **Test**: Send invalid requests, verify validation works
-- [ ] **Test**: Test conversation_id persistence (send multiple messages with same ID)
+- [x] **Implement**: Register blueprint in `app.py`
+- [x] **Test**: Verify chat endpoint is accessible
+- [x] **Implement**: Add request validation
+- [x] **Test**: Send invalid requests, verify validation works
+- [x] **Test**: Test conversation_id persistence (send multiple messages with same ID)
 
 ---
 

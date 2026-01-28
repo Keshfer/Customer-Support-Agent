@@ -12,7 +12,7 @@ All endpoints include request validation and comprehensive error handling.
 import datetime
 import json
 from flask import Blueprint, jsonify, request
-from services.database_service import (
+from backend.services.database_service import (
 	create_chunk_by_url, 
 	create_website, 
 	update_website_status_by_url,
@@ -21,9 +21,9 @@ from services.database_service import (
 	get_website_by_title,
 	get_chunks_by_website_url
 )
-from services.scraping_service import scrape_website, process_scraped_content
-from services.embedding_service import generate_embeddings_batch
-from utils.validate import validate_url
+from backend.services.scraping_service import scrape_website, process_scraped_content
+from backend.services.embedding_service import generate_embeddings_batch
+from backend.utils.validate import validate_url
 import logging
 from werkzeug.exceptions import HTTPException, UnsupportedMediaType
 

@@ -1,6 +1,6 @@
-from services.prompts import format_chat_prompt, format_scraping_confirmation_prompt, tools
+from backend.services.prompts import format_chat_prompt, format_scraping_confirmation_prompt, tools
 from openai import OpenAI
-from config import OPENAI_API_KEY
+from backend.config import OPENAI_API_KEY
 import logging
 import time
 from typing import Optional, List, Dict, Any

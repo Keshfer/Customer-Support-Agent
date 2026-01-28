@@ -2,9 +2,9 @@
 import time
 from typing import Optional
 from firecrawl import Firecrawl
-from config import FIRECRAWL_API_KEY
-from utils.text_processing import chunk_text
-from utils.validate import validate_url
+from backend.config import FIRECRAWL_API_KEY
+from backend.utils.text_processing import chunk_text
+from backend.utils.validate import validate_url
 import logging
 
 logging.basicConfig(level=logging.INFO)

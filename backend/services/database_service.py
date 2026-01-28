@@ -1,7 +1,7 @@
 import psycopg2
 from pgvector.psycopg2 import register_vector
 import psycopg2.pool
-from config import DATABASE_URL
+from backend.config import DATABASE_URL
 import logging
 from contextlib import contextmanager
 
@@ -382,6 +382,7 @@ def save_message(conversation_id, message, sender):
 				RETURNING id;
 			""", (conversation_id, message, sender))
 			message_id = cursor.fetchone()[0]
+			logger.info(f"Message saved with ID: {message_id}")
 			return message_id, None
 	except Exception as e:
 		logger.error(f"Error saving message: {e}")

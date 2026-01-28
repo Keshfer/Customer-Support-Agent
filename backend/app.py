@@ -1,8 +1,8 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-import config
+from backend import config
 import logging
-from routes.web_crawl import crawl_bp
+from backend.routes.web_crawl import crawl_bp
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -34,9 +34,14 @@ except ImportError as e:
 	logger = logging.getLogger(__name__)
 	logger.warning(f"Could not import web_crawl blueprint: {e}")
 
-# TODO: Register chat blueprint when it's created
-# from routes.chat import chat_bp
-# app.register_blueprint(chat_bp, url_prefix='/api')
+# Import and register chat routes
+try:
+	from backend.routes.chat import chat_bp
+	app.register_blueprint(chat_bp, url_prefix='/api')
+	logger.info("Registered chat blueprint")
+except ImportError as e:
+	# Log warning if blueprint can't be imported (e.g., during initial setup)
+	logger.warning(f"Could not import chat blueprint: {e}")
 
 if __name__ == '__main__':
     # Validate configuration before starting
