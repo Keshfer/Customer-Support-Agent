@@ -113,18 +113,20 @@ This TODO list follows the implementation plan with alternating implementation a
 
 - [x] **Implement**: Create `backend/routes/web_crawl.py` blueprint
 - [x] **Implement**: Add `POST /api/websites/scrape` endpoint with full flow
-- [ ] **Test**: Send POST request to scrape a test website, verify:
+- [x] **Test**: Send POST request to scrape a test website, verify:
   - Website record is created in database
   - Chunks are stored with embeddings
   - Response includes website_id and LLM message
 ~~- [ ] **Implement**: Add `GET /api/websites` endpoint
 - [ ] **Test**: Send GET request, verify list of websites is returned~~
-- [ ] **Implement**: Add `GET /api/websites/:id` endpoint
-- [ ] **Test**: Send GET request with ID, verify website and chunks are returned
-- [ ] **Implement**: Register blueprint in `app.py`
-- [ ] **Test**: Verify all endpoints are accessible via HTTP requests
-- [ ] **Implement**: Add request validation
-- [ ] **Test**: Send invalid requests, verify validation errors are returned
+- [x] **Implement**: Add `GET /api/websites/title` endpoint
+- [x] **Test**: Send GET request with website title, verify website and chunks are returned
+- [x] **Implement**: Add `GET /api/websites/url` endpoint
+- [x] **Test**: Send GET request with website url verify website and chunks are returned
+- [x] **Implement**: Register blueprint in `app.py`
+- [x] **Test**: Verify all endpoints are accessible via HTTP requests
+- [x] **Implement**: Add request validation
+- [x] **Test**: Send invalid requests, verify validation errors are returned
 
 ### Chat Routes
 

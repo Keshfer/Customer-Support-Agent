@@ -245,9 +245,11 @@ Based on the finAI.png reference image, the chat interface will feature:
     - Update website status to 'completed'
     - Generate LLM confirmation message
     - Return response with website_id and LLM message
-  - `GET /api/websites`:
-    - Return list of all scraped websites
-  - `GET /api/websites/:id`:
+  ~~- `GET /api/websites`:
+    - Return list of all scraped websites~~
+  - `GET /api/websites/title`:
+    - Return website details and associated chunks
+   - `GET /api/websites/url`:
     - Return website details and associated chunks
   - Error handling for all endpoints
 - [ ] Register blueprint in `app.py`

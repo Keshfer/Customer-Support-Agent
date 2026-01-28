@@ -172,8 +172,10 @@ POST   /api/websites/scrape
 GET    /api/websites
        Response: { "websites": [...] }
 
-GET    /api/websites/:id
+GET    /api/websites/url
        Response: { "website": {...}, "chunks": [...] }
+GET    /api/websites/title
+Response: { "website": {...}, "chunks": [...] }
 
 GET    /api/health
        Response: { "status": "healthy" }
