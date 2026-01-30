@@ -149,25 +149,26 @@ This TODO list follows the implementation plan with alternating implementation a
 
 ### Base Components & Styling
 
-- [ ] **Implement**: Set up Tailwind dark theme with color palette
-- [ ] **Test**: Create test page with all colors, verify they match design
-- [ ] **Implement**: Create `src/components/MessageBubble.tsx`
-- [ ] **Test**: Render MessageBubble with user and agent props, verify styling matches design
-- [ ] **Implement**: Create `src/components/MessageInput.tsx`
-- [ ] **Test**: Render MessageInput, verify input field and send button work
+- [x] **Implement**: Set up Tailwind dark theme with color palette
+- [x] **Test**: Create test page with all colors, verify they match design
+- [x] **Implement**: Create `src/components/MessageBubble.tsx`
+- [x] **Test**: Render MessageBubble with user and agent props, verify styling matches design
+- [x] **Implement**: Create `src/components/MessageInput.tsx`
+- [x] **Test**: Render MessageInput, verify input field and send button work
 
 ### Chat Interface Components
 
-- [ ] **Implement**: Create `src/components/ChatWindow.tsx` with header
-- [ ] **Test**: Render ChatWindow, verify header displays correctly
-- [ ] **Implement**: Create `src/components/MessageList.tsx`
-- [ ] **Test**: Render MessageList with sample messages, verify messages display correctly
-- [ ] **Implement**: Add auto-scroll functionality to MessageList
-- [ ] **Test**: Add messages programmatically, verify auto-scroll works
-- [ ] **Implement**: Create `src/components/WebsiteInput.tsx`
-- [ ] **Test**: Render WebsiteInput, verify URL input and submit button work
-- [ ] **Implement**: Integrate all components in ChatWindow
-- [ ] **Test**: Render full ChatWindow, verify all components are integrated
+- [x] **Implement**: Create `src/components/ChatWindow.tsx` with header
+- [x] **Test**: Render ChatWindow, verify header displays correctly
+- [x] **Implement**: Create `src/components/MessageList.tsx`
+- [x] **Test**: Render MessageList with sample messages, verify messages display correctly
+- [x] **Implement**: Add auto-scroll functionality to MessageList
+- [x] **Test**: Add messages programmatically, verify auto-scroll works
+<!--We'll let the LLM decide to scrape via function call -->
+<!-- - [ ] **Implement**: Create `src/components/WebsiteInput.tsx`
+- [ ] **Test**: Render WebsiteInput, verify URL input and submit button work -->
+- [x] **Implement**: Integrate all components in ChatWindow
+- [x] **Test**: Render full ChatWindow, verify all components are integrated
 
 ### State Management & Hooks
 

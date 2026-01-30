@@ -293,7 +293,7 @@ Based on the finAI.png reference image, the chat interface will feature:
 
 **Tasks**:
 - [ ] Set up Tailwind dark theme configuration
-- [ ] Create color palette matching finAI.png:
+- [ ] Create color palette:
   - Dark background colors
   - Light grey for agent messages
   - Orange for user messages
@@ -306,10 +306,10 @@ Based on the finAI.png reference image, the chat interface will feature:
   - Message content rendering
   - Timestamp display
 - [ ] Create `src/components/MessageInput.tsx`:
-  - Input field with placeholder "Message..."
+  - Input field with placeholder "Input text here"
   - Send button (upward arrow in white circle)
   - Enter key to send
-  - Disabled state during loading
+  - Disabled state during loading and when agent is generating a response
 - [ ] Create basic styling utilities
 
 **Deliverables**:
@@ -323,10 +323,10 @@ Based on the finAI.png reference image, the chat interface will feature:
 - [ ] Create `src/components/ChatWindow.tsx`:
   - Main container for chat interface
   - Header component:
-    - Back arrow icon
-    - Logo (snowflake/Fin logo)
+    -title (Customer Support Agent)
+    <!-- - Back arrow icon
     - Menu dots icon
-    - Expand/fullscreen icon
+    - Expand/fullscreen icon -->
   - Message list area (scrollable)
   - Message input area at bottom
   - Layout matching finAI.png design
@@ -335,11 +335,11 @@ Based on the finAI.png reference image, the chat interface will feature:
   - Auto-scroll to bottom on new messages
   - Loading indicator for agent responses
   - Empty state when no messages
-- [ ] Create `src/components/WebsiteInput.tsx`:
+<!-- - [ ] Create `src/components/WebsiteInput.tsx`:
   - URL input field
   - Submit button
   - Loading state during scraping
-  - Success/error notifications
+  - Success/error notifications -->
 - [ ] Integrate all components in ChatWindow
 
 **Deliverables**:
