@@ -43,6 +43,15 @@ except ImportError as e:
 	# Log warning if blueprint can't be imported (e.g., during initial setup)
 	logger.warning(f"Could not import chat blueprint: {e}")
 
+# Import and register conversation history routes
+try:
+	from backend.routes.conversation_history import conversation_history_bp
+	app.register_blueprint(conversation_history_bp, url_prefix='/api')
+	logger.info("Registered conversation history blueprint")
+except ImportError as e:
+	# Log warning if blueprint can't be imported (e.g., during initial setup)
+	logger.warning(f"Could not import conversation history blueprint: {e}")
+
 if __name__ == '__main__':
     # Validate configuration before starting
     try:

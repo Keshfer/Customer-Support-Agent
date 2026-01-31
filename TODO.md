@@ -172,16 +172,17 @@ This TODO list follows the implementation plan with alternating implementation a
 
 ### State Management & Hooks
 
-- [ ] **Implement**: Create `src/hooks/useChat.ts` with state management
-- [ ] **Test**: Use useChat hook in test component, verify state updates work
-- [ ] **Implement**: Add sendMessage function to useChat
-- [ ] **Test**: Call sendMessage, verify API request is made
-- [ ] **Implement**: Add scrapeWebsite function to useChat
-- [ ] **Test**: Call scrapeWebsite, verify API request is made
-- [ ] **Implement**: Add localStorage persistence for conversation_id
-- [ ] **Test**: Set conversation_id, refresh page, verify it's loaded from localStorage
-- [ ] **Implement**: Update `src/lib/api.ts` with all API functions
-- [ ] **Test**: Call each API function, verify requests are made correctly
+- [x] **Implement**: Create `src/hooks/useChat.ts` with state management
+- [x] **Test**: Use useChat hook in test component, verify state updates work
+- [x] **Implement**: Add sendMessage function to useChat
+- [x] **Test**: Call sendMessage, verify API request is made
+<!-- No need for scrapeWebsite funciton. LLM will decide to scrape using function call tool -->
+<!-- - [ ] **Implement**: Add scrapeWebsite function to useChat
+- [ ] **Test**: Call scrapeWebsite, verify API request is made -->
+- [x] **Implement**: Add localStorage persistence for conversation_id
+- [x] **Test**: Set conversation_id, refresh page, verify it's loaded from localStorage
+- [x] **Implement**: Update `src/lib/api.ts` with all API functions
+- [x] **Test**: Call each API function, verify requests are made correctly
 
 ### Main Page Integration
 
@@ -205,14 +206,18 @@ This TODO list follows the implementation plan with alternating implementation a
 - [ ] **Implement**: Persist conversations in database
 - [ ] **Test**: Create conversation, restart app, verify conversation can be loaded
 
-### Website URL Detection
+### Website scraping tool
+- [ ] **Implement**: Create function tool declaration for LLM to respond with, signifying it wants to scraped the provided URL
+- [ ] **Test**: Test LLM returns a function call response
+
+<!-- ### Website URL Detection
 
 - [ ] **Implement**: Add URL detection in chat messages
 - [ ] **Test**: Send message with URL, verify URL is detected
 - [ ] **Implement**: Auto-trigger scraping when URL detected
 - [ ] **Test**: Send message with URL, verify scraping is triggered automatically
 - [ ] **Implement**: Show scraping progress in chat
-- [ ] **Test**: Trigger scraping, verify progress indicator appears
+- [ ] **Test**: Trigger scraping, verify progress indicator appears -->
 
 ### Error Handling & User Feedback
 
@@ -223,14 +228,14 @@ This TODO list follows the implementation plan with alternating implementation a
 - [ ] **Implement**: Add loading indicators
 - [ ] **Test**: Trigger actions, verify loading indicators appear
 
-### Performance Optimization
+<!-- ### Performance Optimization
 
 - [ ] **Implement**: Add embedding caching
 - [ ] **Test**: Generate embedding twice for same text, verify second call is faster (uses cache)
 - [ ] **Implement**: Optimize database queries
 - [ ] **Test**: Measure query performance, verify improvements
 - [ ] **Implement**: Add connection pooling
-- [ ] **Test**: Make multiple concurrent requests, verify connections are pooled
+- [ ] **Test**: Make multiple concurrent requests, verify connections are pooled -->
 
 ---
 

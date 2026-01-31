@@ -146,6 +146,8 @@ For simple changes, You may make the code change but think carefully and step-by
 
 When a function becomes too long, split it into smaller functions.
 
+Always provide doc strings for each function and comments for code blocks that specify what the function or code block does.
+
 When debugging a problem, make sure you have sufficient information to deeply understand the problem.
 
 More often than not, opt in to adding more logging and tracing to the code to help you understand the problem before making any changes. If you are provided logs that make the source of the problem obvious, then implement a solution. If you're still not 100% confident about the source of the problem, then reflect on 4-6 different possible sources of the problem, distill those down to 1-2 most likely sources, and then implement a solution for the most likely source - either adding more logging to validate your theory or implement the actual fix if you're extremely confident about the source of the problem.
