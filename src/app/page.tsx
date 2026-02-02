@@ -1,83 +1,150 @@
 /**
  * Home Page
  * 
- * Main page component. Currently displays component tests for development.
- * Switch between different test components to verify functionality:
- * - TailWindTest: Color palette verification
- * - MessageBubbleTest: MessageBubble component testing
- * - MessageInputTest: MessageInput component testing
- * - ComponentTests: Combined interactive test
+ * Main page component that renders the ChatWindow with full chat functionality.
+ * 
+ * Features:
+ * - Integrates useChat hook for state management
+ * - Renders ChatWindow component
+ * - ConversationLoader component for loading conversations by ID
+ * - Auto-loads conversation from localStorage on page load
+ * - Error boundary for error handling
+ * - Clear conversation functionality
  */
-// import ComponentTests from '@/components/ComponentTests'
-// import TailWindTest from '@/components/TailwindTest'
-// import MessageBubbleTest from '@/components/MessageBubbleTest'
-// import MessageInputTest from '@/components/MessageInputTest'
-import MessageListTest from "@/frontend_testing/MessageListTest";
-// import ChatWindow from "@/components/ChatWindow";
- import ChatWindowTest from "@/frontend_testing/ChatWindowTest";
-import ChatWindow from "@/components/ChatWindow";
-import { Message } from '@/types';
-import { useState } from 'react';
-import UseChatTest from "@/frontend_testing/useChatTest";
-import ApiTest from "@/frontend_testing/apiTest";
-import UseChatTestReal from "@/frontend_testing/useChatTestReal";
+'use client';
+
+// React hooks for component state and effects
+import { useEffect, useRef } from 'react';
+// Custom hook for chat functionality
+import { useChat } from '@/hooks/useChat';
+// Chat interface component
+import ChatWindow from '@/components/ChatWindow';
+// Component for loading conversations by ID
+import ConversationLoader from '@/components/ConversationLoader';
+// Error boundary component for catching errors
+import ErrorBoundary from '@/components/ErrorBoundary';
+
+/**
+ * Main page component
+ * 
+ * Renders the chat interface with full functionality including:
+ * - Chat window for displaying messages
+ * - Conversation loader for loading previous conversations
+ * - Auto-loading conversation from localStorage
+ * - Error boundary for error handling
+ */
 export default function Home() {
-  // Uncomment the test component you want to see:
-  // return <ApiTest />
-  return <UseChatTestReal />
-  // return <UseChatTest />
-  // State to store messages for the chat
-  // const [messages, setMessages] = useState<Message[]>([]);
-  // // State to simulate loading/agent response generation
-  // const [isLoading, setIsLoading] = useState(false);
-  // // Counter for generating unique message IDs
-  // const [messageCounter, setMessageCounter] = useState(0);
-    /**
-   * Handles message sending from ChatWindow
-   * Simulates sending a user message and generating an agent response
+  // Use the useChat hook to manage chat state and functionality
+  const {
+    messages,
+    conversationId,
+    isLoading,
+    error,
+    sendMessage,
+    loadConversation,
+    clearError,
+    clearConversation,
+  } = useChat();
+
+  // Ref to track if we've already attempted to auto-load conversation
+  // This prevents multiple load attempts
+  const hasAttemptedAutoLoad = useRef(false);
+
+  /**
+   * Auto-load conversation from localStorage on page load
    * 
-   * @param messageText - The message text sent by the user
+   * If a conversation ID exists in localStorage, automatically load
+   * the conversation history when the conversationId is set from localStorage.
+   * This effect watches conversationId and loads messages when it's first set.
    */
-//   const handleSendMessage = (messageText: string) => {
-
-//     // Create user message object
-//     const userMessage: Message = {
-//       id: `user-${messageCounter}`,
-//       message: messageText,
-//       sender: 'user',
-//       timestamp: new Date().toISOString(),
-//     };
-
-//     // Add user message to the message list
-//     setMessages((prev) => [...prev, userMessage]);
-//     setMessageCounter((prev) => prev + 1);
-
-//     // Simulate agent response generation
-//     setIsLoading(true);
+  useEffect(() => {
+    // If conversationId exists, we don't have messages yet, we're not loading, and we haven't attempted to load yet
+    if (conversationId && messages.length === 0 && !isLoading && !hasAttemptedAutoLoad.current) {
+      // Mark that we've attempted to load
+      hasAttemptedAutoLoad.current = true;
+      
+      // Load the conversation history from the backend
+      loadConversation(conversationId).catch((err) => {
+        // If loading fails, log the error but don't block the UI
+        // The user can still start a new conversation
+        console.error('Failed to auto-load conversation:', err);
+        // Reset the flag so user can try again manually
+        hasAttemptedAutoLoad.current = false;
+      });
+    }
     
-//     // Simulate agent thinking/generating response (with delay)
-//     setTimeout(() => {
-//       // Create agent response message
-//       const agentMessage: Message = {
-//         id: `agent-${messageCounter}`,
-//         message: `Thank you for your message: "${messageText}". This is a simulated agent response. I'm here to help you with any questions you might have.`,
-//         sender: 'agent',
-//         timestamp: new Date().toISOString(),
-//       };
-      
-//       // Add agent message to the message list
-//       setMessages((prev) => [...prev, agentMessage]);
-//       setMessageCounter((prev) => prev + 1);
-      
-//       // Stop loading state
-//       setIsLoading(false);
-//     }, 2000);
-// };
+    // Reset the flag if conversationId is cleared (allows re-loading if user clears and starts new)
+    if (!conversationId) {
+      hasAttemptedAutoLoad.current = false;
+    }
+  }, [conversationId, messages.length, isLoading, loadConversation]); // Dependencies: watch for conversationId, messages, and loading state
 
-//   return <ChatWindow 
-//   messages={[]}
-//   onSendMessage={handleSendMessage}
-//   isLoading={isLoading}
-//   agentName="Support Agent"
-//   />
+  /**
+   * Handle clearing the current conversation
+   * 
+   * Clears the conversation ID from localStorage and resets the chat state.
+   * Uses the clearConversation function from useChat hook to clear all state.
+   */
+  const handleClearConversation = () => {
+    // Clear conversation ID from localStorage
+    localStorage.removeItem('customer_support_conversation_id');
+    // Clear conversation using hook function (clears messages, conversationId, and errors)
+    clearConversation();
+  };
+
+  /**
+   * Handle sending a message
+   * 
+   * Wrapper function that calls sendMessage from useChat hook.
+   * This allows us to pass it directly to ChatWindow component.
+   * 
+   * @param message - The message text to send
+   */
+  const handleSendMessage = (message: string) => {
+    // Call sendMessage from useChat hook
+    sendMessage(message);
+  };
+
+  return (
+    <ErrorBoundary>
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Conversation Loader Component */}
+        <ConversationLoader
+          onLoadConversation={loadConversation}
+          isLoading={isLoading}
+          currentConversationId={conversationId}
+          onClearConversation={handleClearConversation}
+        />
+
+        {/* Chat Window Component */}
+        <div className="flex-1 overflow-hidden">
+          <ChatWindow
+            messages={messages}
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+            agentName="Customer Support Agent"
+          />
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="fixed bottom-4 right-4 bg-red-600 p-4 rounded-lg shadow-lg max-w-md z-50">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-white">Error:</p>
+                <p className="text-red-100">{error.message}</p>
+              </div>
+              <button
+                onClick={clearError}
+                className="ml-4 text-white hover:text-red-200 text-xl"
+                aria-label="Close error"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </ErrorBoundary>
+  );
 }
