@@ -221,6 +221,21 @@ export function useChat() {
 		setError(null);
 	}, []);
 
+	/**
+	 * Clear the current conversation
+	 * 
+	 * Clears all messages and conversation ID, allowing user to start a new conversation.
+	 * Also removes conversation ID from localStorage.
+	 */
+	const clearConversation = useCallback(() => {
+		// Clear messages array
+		setMessages([]);
+		// Clear conversation ID (this will also clear localStorage via useEffect)
+		setConversationId(null);
+		// Clear any errors
+		setError(null);
+	}, []);
+
 	// Return hook interface with all state and functions
 	return {
 		messages,
@@ -230,5 +245,6 @@ export function useChat() {
 		sendMessage,
 		loadConversation,
 		clearError,
+		clearConversation,
 	};
 }

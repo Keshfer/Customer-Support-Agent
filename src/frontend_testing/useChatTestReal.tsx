@@ -15,156 +15,12 @@
 'use client';
 
 // React hooks for component state and effects
-import React, { useState, useEffect, useCallback } from 'react';
-// Type definitions for messages
-import { Message } from '../types';
-// Real API functions for testing
-import { sendChatMessage, getConversationHistory } from '../lib/api';
-
-/**
- * Real version of useChat hook for testing with actual API calls
- * 
- * This hook mimics the useChat hook but uses real API functions
- * to make actual HTTP requests to the backend server.
- */
-function useRealChat() {
-  // State for storing all messages in the current conversation
-  const [messages, setMessages] = useState<Message[]>([]);
-  // State for storing the current conversation ID
-  const [conversationId, setConversationId] = useState<string | null>(null);
-  // State for tracking if a request is currently in progress
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  // State for storing any errors that occur during API calls
-  const [error, setError] = useState<Error | null>(null);
-
-  // Load conversation ID from localStorage on component mount
-  useEffect(() => {
-    const storedConversationId = localStorage.getItem('customer_support_conversation_id');
-    if (storedConversationId) {
-      setConversationId(storedConversationId);
-    }
-  }, []);
-
-  // Save conversation ID to localStorage whenever it changes
-  useEffect(() => {
-    if (conversationId) {
-      localStorage.setItem('customer_support_conversation_id', conversationId);
-    } else {
-      localStorage.removeItem('customer_support_conversation_id');
-    }
-  }, [conversationId]);
-
-  /**
-   * Real sendMessage function using actual API
-   * Sends a user message and receives an AI response from the backend
-   */
-  const sendMessage = useCallback(async (message: string) => {
-    if (!message.trim()) {
-      setError(new Error('Message cannot be empty'));
-      return;
-    }
-
-    setError(null);
-    setIsLoading(true);
-
-    // Create user message object
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      message: message.trim(),
-      sender: 'user',
-      timestamp: new Date().toISOString(),
-    };
-
-    // Add user message immediately (optimistic update)
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-
-    try {
-      // Use real API function to send message to backend
-      const response = await sendChatMessage(message.trim(), conversationId || undefined);
-
-      // Update conversation ID if returned
-      if (response.conversation_id) {
-        setConversationId(response.conversation_id);
-      }
-
-      // Create agent response message
-      const agentMessage: Message = {
-        id: `agent-${Date.now()}`,
-        message: response.response,
-        sender: 'agent',
-        timestamp: new Date().toISOString(),
-      };
-
-      // Add agent response
-      setMessages((prevMessages) => [...prevMessages, agentMessage]);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to send message');
-      setError(error);
-      // Remove optimistic user message on error
-      setMessages((prevMessages) => prevMessages.filter((msg) => msg.id !== userMessage.id));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [conversationId]);
-
-  /**
-   * Real loadConversation function using actual API
-   * Loads conversation history from the backend
-   */
-  const loadConversation = useCallback(async (conversationIdToLoad: string) => {
-    if (!conversationIdToLoad) {
-      setError(new Error('Conversation ID is required'));
-      return;
-    }
-
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      // Call real API function to get conversation history
-      const response = await getConversationHistory(conversationIdToLoad);
-
-      // Update conversation ID
-      setConversationId(conversationIdToLoad);
-
-      // Convert backend message format to frontend Message format
-      const loadedMessages: Message[] = response.conversation_history.map((msg) => ({
-        id: msg.id.toString(),
-        message: msg.message,
-        sender: msg.sender as 'user' | 'agent',
-        timestamp: msg.timestamp,
-      }));
-
-      // Update messages array with loaded conversation history
-      setMessages(loadedMessages);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to load conversation');
-      setError(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  /**
-   * Clear error state
-   */
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
-
-  return {
-    messages,
-    conversationId,
-    isLoading,
-    error,
-    sendMessage,
-    loadConversation,
-    clearError,
-  };
-}
+import React, { useState, useEffect } from 'react';
+// Custom hook for chat functionality - using the actual useChat hook
+import { useChat } from '../hooks/useChat';
 
 export default function UseChatTestReal() {
-  // Use the real useChat hook instead of mock one
+  // Use the actual useChat hook to test its implementation
   const {
     messages,
     conversationId,
@@ -173,7 +29,7 @@ export default function UseChatTestReal() {
     sendMessage,
     loadConversation,
     clearError,
-  } = useRealChat();
+  } = useChat();
 
   // State for test message input
   const [testMessage, setTestMessage] = useState('');

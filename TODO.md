@@ -186,12 +186,15 @@ This TODO list follows the implementation plan with alternating implementation a
 
 ### Main Page Integration
 
-- [ ] **Implement**: Update `src/app/page.tsx` to render ChatWindow
-- [ ] **Test**: Open page in browser, verify ChatWindow renders
-- [ ] **Implement**: Integrate useChat hook in page
-- [ ] **Test**: Verify chat functionality works on the page
-- [ ] **Implement**: Add error boundary
-- [ ] **Test**: Trigger error, verify error boundary catches it
+- [x] **Implement**: Update `src/app/page.tsx` to render ChatWindow
+- [x] **Test**: Open page in browser, verify ChatWindow renders
+- [x] **Implement**: Integrate useChat hook in page
+    -Include a component that allows entering in a conversation ID to load its conversation.
+    -If there is a conversation ID stored in local storage, load the conversation everytime the page loads.
+    -Include a button that clears the local storage of the conversation ID
+- [x] **Test**: Verify chat functionality works on the page
+- [x] **Implement**: Add error boundary
+- [x] **Test**: Trigger error, verify error boundary catches it
 
 ---
 

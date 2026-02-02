@@ -2,7 +2,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 // TypeScript type definitions for API responses and errors
 import type { ChatResponse, ScrapeResponse, WebsiteListResponse, WebsiteChunksResponse, ApiError } from '@/types';
-import { type } from 'os';
 
 // Get API URL from environment variable
 // Falls back to localhost:5000 if NEXT_PUBLIC_API_URL is not set
