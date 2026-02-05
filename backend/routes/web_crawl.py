@@ -37,14 +37,12 @@ logger = logging.getLogger(__name__)
 crawl_bp = Blueprint('crawl_route', __name__)
 
 
-
-@crawl_bp.route('/websites/scrape', methods=['POST'])
-def scrape_website_endpoint():
+def scrape_and_store_website(url: str) -> dict:
 	"""
-	Scrape a website and store its content in the database.
+	Helper function that handles the complete website scraping workflow.
 	
-	This endpoint handles the complete website scraping workflow:
-	1. Validates the request and URL
+	This function performs:
+	1. Validates the URL format
 	2. Checks if website already exists (avoids duplicate scraping)
 	3. Creates or updates website record with 'pending' status
 	4. Scrapes website content using Firecrawl API
@@ -52,71 +50,86 @@ def scrape_website_endpoint():
 	6. Generates embeddings for semantic search
 	7. Stores chunks with embeddings in database
 	8. Updates website status to 'completed'
-	9. Returns website data and confirmation message
 	
-	Request Body:
-		{
-			"url": "https://example.com"  # Required: URL to scrape
-		}
+	Args:
+		url: The URL of the website to scrape (must be a valid URL string)
 	
 	Returns:
-		Success (200): {
-			"message": "Website scraped and chunks stored successfully",
-			"website": {
-				"id": 1,
-				"url": "https://example.com",
-				"title": "Example Website",
-				"status": "completed",
-				...
-			}
+		A dictionary with the following structure:
+		
+		Success (200):
+		{
+			'success': True,
+			'status_code': 200,
+			'message': 'Website scraped and chunks stored successfully',
+			'website': {...},  # Website data dict
+			'chunks_count': 5
 		}
 		
-		Error (400): Invalid URL or missing URL in request
-		Error (409): Website already exists and is completed
-		Error (500): Scraping, processing, or database errors
-	
-	Raises:
-		Exception: Catches all exceptions and returns 500 error
+		Success - Already exists (200):
+		{
+			'success': True,
+			'status_code': 200,
+			'website': {...},  # Existing website data
+			'chunks_count': 0  # Not counted if already exists
+		}
+		
+		Success - No content (200):
+		{
+			'success': True,
+			'status_code': 200,
+			'message': 'Website scraped successfully but has no content to chunk',
+			'website': {...},
+			'chunks_count': 0
+		}
+		
+		Error - Invalid URL (400):
+		{
+			'success': False,
+			'status_code': 400,
+			'error': 'Invalid URL: <error message>'
+		}
+		
+		Error - Scraping failed (500):
+		{
+			'success': False,
+			'status_code': 500,
+			'error': '<error message>'
+		}
+		
+		Error - Processing failed (500):
+		{
+			'success': False,
+			'status_code': 500,
+			'error': '<error message>',
+			'total_chunks': 10,  # Optional: if chunking/embedding failed
+			'failed_chunks': 2   # Optional: if storage failed
+		}
 	"""
-
 	try:
-		# Step 1: Extract and validate request data
-		# Get JSON data from request body
-		data = request.get_json()
-		# Validate that request contains JSON data with 'url' field
-		if 'url' not in data:
-			return jsonify({'error': 'URL is required in request body'}), 400
-		
-		# Extract and clean URL (remove leading/trailing whitespace)
-		url = data['url'].strip()
-		if not url:
-			return jsonify({'error': 'URL cannot be empty'}), 400
-		
-		logger.info(f"Received scrape request for URL: {url}")
-		
-		# Step 2: Validate URL format
+		# Step 1: Validate URL format
 		# Uses validators library to check URL format and scheme (http/https)
 		url_valid, error_message = validate_url(url)
 		if not url_valid:
 			logger.warning(f"Invalid URL provided: {url} - {error_message}")
-			return jsonify({'error': f'Invalid URL: {error_message}'}), 400
+			return {
+				'success': False,
+				'status_code': 400,
+				'error': f'Invalid URL: {error_message}'
+			}
 
-		# Step 3: Check if website already exists in database
-		# If website exists and is completed, return error to avoid duplicate scraping
+		# Step 2: Check if website already exists in database
+		# If website exists and is completed, return existing data to avoid duplicate scraping
 		existing_website, _ = get_website_by_url(url)
 		if existing_website and existing_website['status'] == 'completed':
 			logger.info(f"Website already exists and is completed: {url}")
-			#return the website data
-			return jsonify({
+			return {
+				'success': True,
+				'status_code': 200,
 				'website': existing_website
-			}), 200
-			# return jsonify({
-			# 	'error': 'Website already exists and has been scraped',
-			# 	'url': url,
-			# 	'website': existing_website
-			# }), 409
+			}
 		
-		# Step 4: Create or update website record
+		# Step 3: Create or update website record
 		# If website exists but not completed (pending/failed), update status to pending
 		# If website doesn't exist, create new record with 'pending' status
 		if existing_website:
@@ -125,7 +138,11 @@ def scrape_website_endpoint():
 			success, error = update_website_status_by_url(url, "pending")
 			if error:
 				logger.error(f"Failed to update website status: {error}")
-				return jsonify({'error': error}), 500
+				return {
+					'success': False,
+					'status_code': 500,
+					'error': error
+				}
 		else:
 			# Create new website record with 'pending' status
 			# Title is set to None initially, will be updated after scraping
@@ -133,9 +150,13 @@ def scrape_website_endpoint():
 			website_id, error = create_website(url, None, "pending")
 			if error:
 				logger.error(f"Failed to create website record: {error}")
-				return jsonify({'error': error}), 500
+				return {
+					'success': False,
+					'status_code': 500,
+					'error': error
+				}
 
-		# Step 5: Scrape website content using Firecrawl API
+		# Step 4: Scrape website content using Firecrawl API
 		# This calls the scraping service which handles Firecrawl API integration
 		logger.info(f"Starting website scraping: {url}")
 		content_json = scrape_website(url)
@@ -145,7 +166,11 @@ def scrape_website_endpoint():
 			logger.error(f"Scraping failed: {content_json['error']}")
 			# Update website status to 'failed' to indicate scraping failure
 			update_website_status_by_url(url, "failed")
-			return jsonify({'error': content_json['error']}), 500
+			return {
+				'success': False,
+				'status_code': 500,
+				'error': content_json['error']
+			}
 		
 		# Extract scraped content and metadata
 		website_title = content_json.get('website_title', 'Untitled')
@@ -154,13 +179,13 @@ def scrape_website_endpoint():
 		
 		logger.info(f"Successfully scraped website: {url}, title: {website_title}")
 		
-		# Step 6: Update website record with actual title from scraping
+		# Step 5: Update website record with actual title from scraping
 		# Title was None initially, now we update it with the scraped title
 		success, error = update_website_title_by_url(url, website_title)
 		if error:
 			logger.warning(f"Failed to update website title (non-critical): {error}")
 		
-		# Step 7: Process and chunk the scraped content
+		# Step 6: Process and chunk the scraped content
 		# Chunk size: 800 tokens, overlap: 100 tokens for context preservation
 		# This splits the content into manageable pieces for embedding and storage
 		logger.info(f"Processing and chunking content for: {url}")
@@ -172,11 +197,13 @@ def scrape_website_endpoint():
 			# Update status to completed even with no chunks
 			update_website_status_by_url(url, "completed")
 			website_data, _ = get_website_by_url(url)
-			return jsonify({
+			return {
+				'success': True,
+				'status_code': 200,
 				'message': 'Website scraped successfully but has no content to chunk',
 				'website': website_data,
 				'chunks_count': 0
-			}), 200
+			}
 		
 		chunks = process_scraped_content(markdown_content, chunk_size=800, overlap=100)
 		
@@ -185,11 +212,15 @@ def scrape_website_endpoint():
 		if chunks is None or len(chunks) == 0:
 			logger.error(f"Failed to chunk content for: {url} (content exists but chunking failed)")
 			update_website_status_by_url(url, "failed")
-			return jsonify({'error': 'Failed to chunk content'}), 500
+			return {
+				'success': False,
+				'status_code': 500,
+				'error': 'Failed to chunk content'
+			}
 		
 		logger.info(f"Content chunked into {len(chunks)} pieces")
 		
-		# Step 8: Generate embeddings for all chunks
+		# Step 7: Generate embeddings for all chunks
 		# Embeddings are vector representations used for semantic search
 		# Batch processing is more efficient than individual API calls
 		logger.info(f"Generating embeddings for {len(chunks)} chunks")
@@ -198,11 +229,15 @@ def scrape_website_endpoint():
 		if embeddings is None or len(embeddings) != len(chunks):
 			logger.error(f"Failed to generate embeddings or count mismatch for: {url}")
 			update_website_status_by_url(url, "failed")
-			return jsonify({'error': 'Failed to generate embeddings'}), 500
+			return {
+				'success': False,
+				'status_code': 500,
+				'error': 'Failed to generate embeddings'
+			}
 		
 		logger.info(f"Successfully generated {len(embeddings)} embeddings")
 		
-		# Step 9: Store chunks with embeddings in database
+		# Step 8: Store chunks with embeddings in database
 		# Each chunk is stored with its embedding and metadata
 		# Metadata includes title, URL, and scraped timestamp for reference
 		error_count = 0
@@ -234,37 +269,128 @@ def scrape_website_endpoint():
 		if error_count > 0:
 			logger.warning(f"Failed to store {error_count} out of {len(chunks)} chunks")
 			update_website_status_by_url(url, "failed")
-			return jsonify({
+			return {
+				'success': False,
+				'status_code': 500,
 				'error': f'Failed to store {error_count} chunks',
 				'total_chunks': len(chunks),
 				'failed_chunks': error_count
-			}), 500
+			}
 		
 		logger.info(f"Successfully stored {len(chunks)} chunks in database")
 		
-		# Step 10: Update website status to 'completed'
+		# Step 9: Update website status to 'completed'
 		# This indicates the scraping and storage process completed successfully
 		success, error = update_website_status_by_url(url, "completed")
 		if error:
 			logger.warning(f"Failed to update website status (non-critical): {error}")
 		
-		# Step 11: Retrieve final website data and return response
+		# Step 10: Retrieve final website data and return response
 		# Get the complete website record including all updated fields
 		website_data, _ = get_website_by_url(url)
 		
 		logger.info(f"Website scraping completed successfully: {url}")
 		
-		return jsonify({
+		return {
+			'success': True,
+			'status_code': 200,
 			'message': 'Website scraped and chunks stored successfully',
 			'website': website_data,
 			'chunks_count': len(chunks)
-		}), 200
+		}
+	except Exception as e:
+		# Catch any unexpected errors and return generic error message
+		# Log the full error for debugging while keeping response user-friendly
+		logger.error(f"Unexpected error scraping website: {e}", exc_info=True)
+		return {
+			'success': False,
+			'status_code': 500,
+			'error': 'An unexpected error occurred while scraping the website'
+		}
+
+
+@crawl_bp.route('/websites/scrape', methods=['POST'])
+def scrape_website_endpoint():
+	"""
+	Scrape a website and store its content in the database.
+	
+	This endpoint handles the HTTP request/response and delegates the actual
+	scraping logic to scrape_and_store_website() helper function.
+	
+	Request Body:
+		{
+			"url": "https://example.com"  # Required: URL to scrape
+		}
+	
+	Returns:
+		Success (200): {
+			"message": "Website scraped and chunks stored successfully",
+			"website": {
+				"id": 1,
+				"url": "https://example.com",
+				"title": "Example Website",
+				"status": "completed",
+				...
+			},
+			"chunks_count": 5
+		}
+		
+		Error (400): Invalid URL or missing URL in request
+		Error (500): Scraping, processing, or database errors
+	
+	Raises:
+		HTTPException: Re-raised for proper Flask error handling
+		Exception: Catches all other exceptions and returns 500 error
+	"""
+	try:
+		# Step 1: Extract and validate request data
+		# Get JSON data from request body
+		data = request.get_json()
+		# Validate that request contains JSON data with 'url' field
+		if 'url' not in data:
+			return jsonify({'error': 'URL is required in request body'}), 400
+		
+		# Extract and clean URL (remove leading/trailing whitespace)
+		url = data['url'].strip()
+		if not url:
+			return jsonify({'error': 'URL cannot be empty'}), 400
+		
+		logger.info(f"Received scrape request for URL: {url}")
+		
+		# Step 2: Call helper function to perform scraping
+		# The helper function handles all validation, scraping, processing, and storage
+		result = scrape_and_store_website(url)
+		
+		# Step 3: Convert result dict to Flask response
+		status_code = result.get('status_code', 500)
+		
+		# Build response based on success/failure
+		if result.get('success', False):
+			# Success case - build response with available fields
+			response_data = {}
+			if 'message' in result:
+				response_data['message'] = result['message']
+			if 'website' in result:
+				response_data['website'] = result['website']
+			if 'chunks_count' in result:
+				response_data['chunks_count'] = result['chunks_count']
+			return jsonify(response_data), status_code
+		else:
+			# Error case - return error message
+			error_data = {'error': result.get('error', 'An unknown error occurred')}
+			# Include additional error details if available
+			if 'total_chunks' in result:
+				error_data['total_chunks'] = result['total_chunks']
+			if 'failed_chunks' in result:
+				error_data['failed_chunks'] = result['failed_chunks']
+			return jsonify(error_data), status_code
+			
 	except HTTPException:
 		raise
 	except Exception as e:
 		# Catch any unexpected errors and return generic error message
 		# Log the full error for debugging while keeping response user-friendly
-		logger.error(f"Unexpected error scraping website: {e}", exc_info=True)
+		logger.error(f"Unexpected error in scrape_website_endpoint: {e}", exc_info=True)
 		return jsonify({'error': 'An unexpected error occurred while scraping the website'}), 500
 
 

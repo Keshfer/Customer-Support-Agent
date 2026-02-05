@@ -406,7 +406,7 @@ Based on the finAI.png reference image, the chat interface will feature:
 - Conversation history working
 - Users can continue previous conversations
 
-### 5.2 Website URL Detection
+<!-- ### 5.2 Website URL Detection
 **Estimated Time**: 2-3 hours
 
 **Tasks**:
@@ -416,7 +416,7 @@ Based on the finAI.png reference image, the chat interface will feature:
 - [ ] Display confirmation message from LLM
 
 **Deliverables**:
-- Automatic website scraping from chat messages
+- Automatic website scraping from chat messages -->
 
 ### 5.3 Error Handling & User Feedback
 **Estimated Time**: 3-4 hours

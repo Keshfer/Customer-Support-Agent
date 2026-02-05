@@ -15,18 +15,18 @@ tools = [
 	{
 		"type": "function",
 		"name": "query_database",
-		"description": "Search the database for relevant content",
+		"description": "Search the database for relevant content that can answer the user's query. Use this when you need to find information from previously scraped websites.",
 		"parameters": {
 			"type": "object",
 			"properties": {
-				"db_query": { "type": "string", "description": "The query used to find relevant content to pull from the database"},
+				"user_query": { "type": "string", "description": "The user's query you are trying to answer"},
 			},
-			"required": ["db_query"],
+			"required": ["user_query"],
 		},
 	},
 ]
 
-def format_chat_prompt():
+def format_chat_prompt(relevant_info: str):
 	"""
 	Returns the system prompt (instructions) for the customer support AI agent.
 	
@@ -37,14 +37,24 @@ def format_chat_prompt():
 		A string representing the system prompt/instructions for the AI agent
 	"""
 	return """You are a helpful customer support AI agent with a strong focus on accuracy and helpfulness.
-Your role is to answer questions based on the information fetched from your database.
+Your role is to answer questions based on the information fetched from websites provided by the user.
 
 Guidelines:
-- Only answer questions based on the information fetched from your database.
-- If you can't find the relevant information, politely say you don't have that information.
-- Prompt the user to provide the relevant information through a website link if the answer is not in the context.
+- Use the tools available to you to find information and answer user questions.
+- If you need information from the database, use the query_database tool with the user's question.
+- If you need to scrape a website, use the website_search tool with the website URL.
+- Only answer questions based on information you retrieve using the available tools.
+- If you cannot find enough information to answer the question, let the user know and suggest they provide a website link for you to examine.
+- Do not make up information. If you don't have the information, say so.
 - Be concise and helpful.
-- Use the tools available to you to satisfy the above guidelines."""
+- You can make multiple tool calls in sequence if needed to gather all necessary information. However, you only
+have a limited number of iterations to call tools and reason before you must return a final response to the user.
+- At the final iteration, you must generate a final response for the user.
+
+Relevant Info:
+{relevant_info}
+"""
+
 def format_scraping_confirmation_prompt(website_title):
 	"""
 	Formats the scraping confirmation prompt for the OpenAI API

@@ -209,9 +209,17 @@ This TODO list follows the implementation plan with alternating implementation a
 - [ ] **Implement**: Persist conversations in database
 - [ ] **Test**: Create conversation, restart app, verify conversation can be loaded
 
-### Website scraping tool
-- [ ] **Implement**: Create function tool declaration for LLM to respond with, signifying it wants to scraped the provided URL
-- [ ] **Test**: Test LLM returns a function call response
+### Website Scraping Tool
+- [x] **Implement**: Create function tool declaration for LLM to respond with, signifying it wants to scraped the provided URL
+  * The function tool should specify the url is a required parameter
+- [x] **Test**: Test LLM returns a function call response
+- [x] **Implement**: Create a function that gets called after the LLM returns the scraping tool declaration.
+This function will:
+  * Call the web_crawl.py route to scrape the provided URL.
+  * Call generate_response with the user's query, assuming it is given in the same message as the website url. 
+  * return the generated response to the front end.
+- [x] **Test**: Test the function returns a generated response after scraping a website.
+
 
 <!-- ### Website URL Detection
 
