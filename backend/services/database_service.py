@@ -104,6 +104,29 @@ def create_website(url, title, status):
 		logger.error(f"Error creating website: {e}")
 		return None, f"Error creating website: {e}"
 
+def get_website_by_id(id):
+	"""Return website by ID"""
+	try:
+		with get_db_cursor() as cursor:
+			cursor.execute("""
+				SELECT id, url, title, scraped_at, status
+				FROM websites WHERE id = %s;
+			""", (id,))
+			website = cursor.fetchone()
+			if not website:
+				return None, "Website not found"
+			website_data = {
+				'id': website[0],
+				'url': website[1],
+				'title': website[2],
+				'scraped_at': website[3],
+				'status': website[4]
+			}
+			return website_data, None
+	except Exception as e:
+		logger.error(f"Error getting website by ID: {e}")
+		return None, f"Error getting website by ID: {e}"
+
 def get_website_by_url(url):
 	"""Return website by URL"""
 	try:
@@ -416,6 +439,33 @@ def get_conversation_history(conversation_id):
 	except Exception as e:
 		logger.error(f"Error getting conversation history: {e}")
 		return None, f"Error getting conversation history: {e}"
+def get_all_conversation_ids():
+	"""Get all conversation histories (returns all conversations with their messages)"""
+	try:
+		with get_db_cursor() as cursor:
+			cursor.execute("""
+				SELECT id, conversation_id, message, sender, timestamp
+				FROM messages
+				ORDER BY conversation_id ASC;
+			""")
+			messages = cursor.fetchall()
+			if not messages:
+				return None, "No conversation histories found"
+			conversation_histories_list = []
+			for m in messages:
+				conversation_histories_list.append(
+					{
+						'id': m[0],
+						'conversation_id': m[1],
+						'message': m[2],
+						'sender': m[3],
+						'timestamp': m[4]
+					}
+				)
+			return conversation_histories_list, None
+	except Exception as e:
+		logger.error(f"Error getting all conversation histories: {e}")
+		return None, f"Error getting all conversation histories: {e}"
 #Cleanup function (call on application shutdown)
 def close_connection_pool():
 	"""Close all connections in the pool"""

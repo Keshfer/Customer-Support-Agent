@@ -16,7 +16,7 @@ else:
 	logger.error("OPENAI_API_KEY is not set")
 	openai = None
 
-def generate_response(conversation_history: List[Dict[str, Any]] = None, attempts: int = 3) -> Optional[str]:
+def generate_response(conversation_history: List[Dict[str, Any]] = None, relevant_info: str = None, attempts: int = 3) -> Optional[Any]:
 	"""
 	Generates a response from the OpenAI API using the Responses API.
 	
@@ -28,6 +28,7 @@ def generate_response(conversation_history: List[Dict[str, Any]] = None, attempt
 		conversation_history: The conversation history to use as input (list of message dicts).
 			Each dict should have 'role' and 'content' keys, e.g.:
 			[{"role": "user", "content": "Hello"}, {"role": "assistant", "content": "Hi there"}]
+		relevant_info: The relevant information collected from websites to answer the user's questions.
 		attempts: Number of retry attempts if API call fails (default: 3)
 	
 	Returns:
@@ -48,7 +49,7 @@ def generate_response(conversation_history: List[Dict[str, Any]] = None, attempt
 			return None
 	
 	# Get system prompt (instructions) - no conversation history needed here
-	system_prompt = format_chat_prompt()
+	system_prompt = format_chat_prompt(relevant_info)
 	if conversation_history is None or len(conversation_history) == 0:
 		logger.info("No conversation history provided.")
 		return None
@@ -63,7 +64,8 @@ def generate_response(conversation_history: List[Dict[str, Any]] = None, attempt
 				input=conversation_history,
 			)
 			#logger.info(f"Response: {response}")
-			return response.output_text #https://platform.openai.com/docs/api-reference/responses/object#responses-object-output_text
+			return response #https://platform.openai.com/docs/api-reference/responses
+			#return response.output_text #https://platform.openai.com/docs/api-reference/responses/object#responses-object-output_text
 		except Exception as e:
 			last_error = e
 			logger.error(f"Error generating response (attempt {counter + 1}/{attempts}): {e}")
