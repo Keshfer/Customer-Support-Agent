@@ -90,13 +90,12 @@ class MessageContent:
 	
 	def to_openai_content(self) -> str:
 		"""
-		Convert to OpenAI-compatible format (just the content string).
-		Removes show_user and type fields as OpenAI doesn't support them.
+		Converts content to string
 		
 		Returns:
-			The MessageContent as a JSON formatted string
+			The content field as a string
 		"""
-		return self.to_json()
+		return self.content
 
 
 class FunctionCallOutput:
@@ -181,18 +180,18 @@ class FunctionCallOutput:
 	
 	def to_openai_content(self) -> str:
 		"""
-		Convert to OpenAI-compatible format (dict with call_id and output).
+		Convert to JSON formatted string with call_id and output.
 		Removes show_user and type fields as OpenAI doesn't support them.
 		
 		Returns:
-			FunctionCallOutput as a JSON formated string
+			JSON formatted string with call_id and output
 		"""
-		# return {
-		# 	"type": "function_call_output",
-		# 	"call_id": self.call_id,
-		# 	"output": self.output
-		# }
-		return self.to_json()
+		return json.dumps({
+			"type": "function_call_output",
+			"call_id": self.call_id,
+			"output": self.output
+		})
+		#return self.to_json()
 
 
 def convert_to_openai_format(conversation_history: list) -> list:
@@ -228,7 +227,7 @@ def convert_to_openai_format(conversation_history: list) -> list:
 			# MessageContent instance - convert to string
 			openai_content = content.to_openai_content()
 		elif isinstance(content, FunctionCallOutput):
-			# FunctionCallOutput instance - convert to dict
+			# FunctionCallOutput instance - convert to JSON string
 			openai_content = content.to_openai_content()
 		elif isinstance(content, dict):
 			# Dictionary - check type and convert accordingly

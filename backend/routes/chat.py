@@ -146,10 +146,11 @@ def chat_message():
 		
 		# Handle conversation history retrieval
 		# If history exists, we'll format it for OpenAI. If not, we'll start fresh.
+		#formatted_history is a list of dicts with 'role' and 'content' keys. content can be a MessageContent instance or a FunctionCallOutput instance.
 		if history_error or not conversation_history:
 			logger.info("No conversation history found or error occurred - starting fresh conversation")
 			# Start with just the current user message
-			formatted_history = [{"role": "user", "content": user_message_content.to_json()}]
+			formatted_history = [{"role": "user", "content": user_message_content}]
 		else:
 			# Step 4: Format conversation history for OpenAI API
 			# OpenAI expects messages in a specific format: list of dicts with 'role' and 'content'
@@ -234,7 +235,7 @@ def chat_message():
 					'error': 'Failed to generate AI response',
 					'conversation_id': conversation_id
 				}), 500
-			print(f"full_response: {full_response}")
+			#print(f"full_response: {full_response}")
 			# Step 5b: Process response output items
 			# Check for function calls and messages in the response
 			has_function_calls = False
@@ -245,7 +246,7 @@ def chat_message():
 				break
 			#process each element in the output list
 			for item in full_response.output:
-				print(f"item: {item}, type: {type(item)}")
+				#print(f"item: {item}, type: {type(item)}")
 				if item.type == 'function_call':
 					# Handle function call
 					has_function_calls = True
@@ -314,6 +315,7 @@ def chat_message():
 			last_item = new_responses[-1]
 			content = last_item.get('content', '')
 			if isinstance(content, MessageContent):
+				logger.info(f"final_response_text from MessageContent: {content.content}")
 				final_response_text = content.content
 			elif isinstance(content, dict) and content.get('type') == 'message':
 				final_response_text = content.get('content', '')
@@ -351,7 +353,7 @@ def chat_message():
 		# Step 7: Return response with conversation_id
 		# Include conversation_id so the frontend can maintain conversation state
 		logger.info(f"Chat message endpoint completed successfully for conversation: {conversation_id}")
-		
+		logger.info(f"final_response_text: {final_response_text}")
 		return jsonify({
 			'response': final_response_text,
 			'conversation_id': conversation_id
