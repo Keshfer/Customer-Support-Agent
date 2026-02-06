@@ -54,7 +54,7 @@ export default function ChatWindowTest() {
       const agentMessage: Message = {
         id: `agent-${messageCounter}`,
         message: `Thank you for your message: "${messageText}". This is a simulated agent response. I'm here to help you with any questions you might have.`,
-        sender: 'agent',
+        sender: 'assistant',
         timestamp: new Date().toISOString(),
       };
       
@@ -77,7 +77,7 @@ export default function ChatWindowTest() {
       {
         id: 'init-1',
         message: 'Hello! Welcome to the Customer Support Agent. I\'m here to help you with any questions or issues you might have. How can I assist you today?',
-        sender: 'agent',
+        sender: 'assistant',
         timestamp: new Date(Date.now() - 120000).toISOString(), // 2 minutes ago
       },
       {
@@ -89,7 +89,7 @@ export default function ChatWindowTest() {
       {
         id: 'init-3',
         message: 'I\'d be happy to help you with your account settings! What specific aspect would you like to change or learn more about?',
-        sender: 'agent',
+        sender: 'assistant',
         timestamp: new Date(Date.now() - 30000).toISOString(), // 30 seconds ago
       },
     ];
@@ -124,7 +124,7 @@ export default function ChatWindowTest() {
       newMessages.push({
         id: `msg-${messageCounter + i}`,
         message: `Test message ${i + 1}: This is a test message to verify scrolling and layout behavior.`,
-        sender: i % 2 === 0 ? 'user' : 'agent',
+        sender: i % 2 === 0 ? 'user' : 'assistant',
         timestamp: new Date(Date.now() - (5 - i) * 1000).toISOString(),
       });
     }

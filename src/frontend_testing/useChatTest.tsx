@@ -90,7 +90,7 @@ function useMockChat() {
       const agentMessage: Message = {
         id: `agent-${Date.now()}`,
         message: response.response,
-        sender: 'agent',
+        sender: 'assistant',
         timestamp: new Date().toISOString(),
       };
 

@@ -226,7 +226,7 @@ export async function getConversationHistory(
   id: number;
   conversation_id: string;
   message: string;
-  sender: 'user' | 'agent';
+  sender: 'user' | 'assistant';
   timestamp: string;
 }> }> {
   try {
@@ -234,7 +234,7 @@ export async function getConversationHistory(
       id: number;
       conversation_id: string;
       message: string;
-      sender: 'user' | 'agent';
+      sender: 'user' | 'assistant';
       timestamp: string;
     };
     type ConversationHistoryResponse = {
@@ -244,8 +244,48 @@ export async function getConversationHistory(
     const response = await apiClient.post<ConversationHistoryResponse>('/api/chat/conversation_history', {
       conversation_id: conversationId,
     });
+    //convert the response data to frontend format. For every message with show_user set to true
+    //set message to only be the text
+    let frontend_conversation_history: ConversationMessage[] = [];
+    for (const message of response.data.conversation_history) {
+      let message_contents = message.message;
+      let message_contents_json = JSON.parse(message_contents) as Record<string, any>;
+      if (message_contents_json.type === 'message' && message_contents_json.show_user === true){
+        frontend_conversation_history.push({
+          id: message.id,
+          conversation_id: message.conversation_id,
+          message: message_contents_json.content,
+          sender: message.sender,
+          timestamp: message.timestamp,
+        } as ConversationMessage)
+      } else if (message_contents_json.type === 'function_call_output' && message_contents_json.show_user === true){
+        //Currently we don't want to display function call outputs to the user but just in case we provide this.
+        frontend_conversation_history.push({
+          id: message.id,
+          conversation_id: message.conversation_id,
+          message: message_contents_json.output,
+          sender: message.sender,
+          timestamp: message.timestamp,
+        } as ConversationMessage)
+      }
+    }
+    let conversation_history_res: ConversationHistoryResponse = {
+      conversation_history: frontend_conversation_history,
+    }
+    return conversation_history_res;
+    // const frontend_conversation_history = response.data.conversation_history.map((message) => {
+    //   let message_contents = message.message;
+    //   let message_contents_json = JSON.parse(message_contents) as Record<string, any>;
+    //   if (message.show_user) {
+    //     return {
+    //       id: message.id,
+    //       conversation_id: message.conversation_id,
+    //       message: message.message,
+    //     };
+    //   }
+    // });
     // Return the response data (contains conversation_history array)
-    return response.data;
+    // return response.data;
   } catch (error) {
     // Convert error to standardized ApiError format
     throw handleApiError(error);
