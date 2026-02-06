@@ -3,7 +3,7 @@ import * as z from 'zod'
 const MessageScheme = z.object({
 	id:z.string().optional(),
 	message:z.string(),
-	sender:z.enum(["user", "agent"]),
+	sender:z.enum(["user", "assistant"]),
 	timestamp:z.string().optional()
 });
 

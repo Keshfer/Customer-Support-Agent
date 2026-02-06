@@ -19,7 +19,7 @@ import { Message } from '../types';
 
 interface MessageBubbleProps {
   message: Message;
-  sender: 'user' | 'agent';
+  sender: 'user' | 'assistant';
   timestamp?: string;
   agentName?: string;
 }
@@ -58,7 +58,7 @@ export default function MessageBubble({
   const formattedTime = formatTimestamp(displayTimestamp);
 
   // Render agent message (left-aligned, light blue)
-  if (sender === 'agent') {
+  if (sender === 'assistant') {
     return (
       <div className="flex items-start gap-3 mb-4">
         {/* Agent avatar/logo */}

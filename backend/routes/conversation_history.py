@@ -20,6 +20,18 @@ conversation_history_bp = Blueprint('conversation_history', __name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def convert_to_frontend_format(messages_list):
+	"""
+	Convert messages_list to frontend format. Removes the fields type and show_user. Only returns the content as a string
+	
+	Args:
+		messages_list: List of messages
+	
+	Returns:
+		List of messages in frontend format
+	"""
+	frontend_messages_list = []
+
 
 @conversation_history_bp.route('/chat/conversation_history', methods=['POST'])
 def get_conversation_history_route():
@@ -113,7 +125,6 @@ def get_conversation_history_route():
 				# Database or other error occurred
 				logger.error(f"Database error retrieving conversation history: {error}")
 				return jsonify({'error': error}), 500
-		
 		# Step 6: Return conversation history
 		# Success case: messages_list contains the conversation history
 		logger.info(f"Successfully retrieved {len(messages_list)} messages for conversation_id: {conversation_id}")

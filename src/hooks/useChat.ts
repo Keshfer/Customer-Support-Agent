@@ -134,7 +134,7 @@ export function useChat() {
 			const agentMessage: Message = {
 				id: `agent-${Date.now()}`,
 				message: response.response,
-				sender: 'agent',
+				sender: 'assistant',
 				timestamp: new Date().toISOString(),
 			};
 
@@ -196,7 +196,7 @@ export function useChat() {
 			const loadedMessages: Message[] = response.conversation_history.map((msg) => ({
 				id: msg.id.toString(),
 				message: msg.message,
-				sender: msg.sender as 'user' | 'agent',
+				sender: msg.sender as 'user' | 'assistant',
 				timestamp: msg.timestamp,
 			}));
 			
