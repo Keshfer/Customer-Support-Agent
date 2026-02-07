@@ -16,6 +16,7 @@
  */
 import React from 'react';
 import { Message } from '../types';
+import ReactMarkdown from 'react-markdown';
 
 interface MessageBubbleProps {
   message: Message;
@@ -77,9 +78,11 @@ export default function MessageBubble({
           
           {/* Message content */}
           <div className="bg-agent rounded-lg px-4 py-2 max-x-full">
-            <p className="text-agent-text text-sm whitespace-pre-wrap break-words">
+            <div className="prose prose-sm max-w-none break-words text-agent-text">
+            <ReactMarkdown>
               {message.message}
-            </p>
+            </ReactMarkdown>
+            </div>
           </div>
           
           {/* Timestamp */}
@@ -100,9 +103,11 @@ export default function MessageBubble({
       <div className="flex flex-col items-end max-w-[70%] md:max-w-md min-w-0">
         {/* Message content */}
         <div className="bg-user rounded-lg px-4 py-2 max-w-full">
-          <p className="text-user-text text-sm whitespace-pre-wrap break-words">
-            {message.message}
-          </p>
+          <div className="prose prose-sm max-w-none break-words text-user-text">
+            <ReactMarkdown>
+              {message.message}
+            </ReactMarkdown>
+          </div>
         </div>
         
         {/* Timestamp */}
