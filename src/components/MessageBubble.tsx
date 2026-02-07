@@ -61,14 +61,14 @@ export default function MessageBubble({
   // Render agent message (left-aligned, light blue)
   if (sender === 'assistant') {
     return (
-      <div className="flex items-start gap-3 mb-4">
+      <div className="flex items-start gap-2 sm:gap-3 mb-4">
         {/* Agent avatar/logo */}
         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-agent flex items-center justify-center">
           <span className="text-agent-text text-xs font-bold">A</span>
         </div>
         
         {/* Agent message bubble */}
-        <div className="flex flex-col max-w-[70%] md:max-w-md min-w-0">
+        <div className="flex flex-col max-w-[85%] sm:max-w-[70%] md:max-w-md min-w-0">
           {/* Agent name */}
           <div className="flex items-center gap-2 mb-1">
             <span className="text-text-primary text-sm font-semibold">{agentName}</span>
@@ -77,9 +77,16 @@ export default function MessageBubble({
           </div>
           
           {/* Message content */}
-          <div className="bg-agent rounded-lg px-4 py-2 max-x-full">
-            <div className="prose prose-sm max-w-none break-words text-agent-text">
-            <ReactMarkdown>
+          <div className="bg-agent rounded-lg px-3 py-2 sm:px-4 max-w-full overflow-hidden">
+            <div className="prose prose-sm max-w-none break-words overflow-wrap-anywhere text-agent-text">
+            <ReactMarkdown
+              components={{
+                // Ensure code blocks and pre elements wrap properly
+                pre: ({ children }) => <pre className="whitespace-pre-wrap break-words overflow-x-auto max-w-full">{children}</pre>,
+                code: ({ children }) => <code className="break-words whitespace-pre-wrap">{children}</code>,
+                p: ({ children }) => <p className="break-words overflow-wrap-anywhere">{children}</p>,
+              }}
+            >
               {message.message}
             </ReactMarkdown>
             </div>
@@ -98,13 +105,20 @@ export default function MessageBubble({
 
   // Render user message (right-aligned, orange)
   return (
-    <div className="flex items-start gap-3 mb-4 justify-end">
+    <div className="flex items-start gap-2 sm:gap-3 mb-4 justify-end">
       {/* User message bubble */}
-      <div className="flex flex-col items-end max-w-[70%] md:max-w-md min-w-0">
+      <div className="flex flex-col items-end max-w-[85%] sm:max-w-[70%] md:max-w-md min-w-0">
         {/* Message content */}
-        <div className="bg-user rounded-lg px-4 py-2 max-w-full">
-          <div className="prose prose-sm max-w-none break-words text-user-text">
-            <ReactMarkdown>
+        <div className="bg-user rounded-lg px-3 py-2 sm:px-4 max-w-full overflow-hidden">
+          <div className="prose prose-sm max-w-none break-words overflow-wrap-anywhere text-user-text">
+            <ReactMarkdown
+              components={{
+                // Ensure code blocks and pre elements wrap properly
+                pre: ({ children }) => <pre className="whitespace-pre-wrap break-words overflow-x-auto max-w-full">{children}</pre>,
+                code: ({ children }) => <code className="break-words whitespace-pre-wrap">{children}</code>,
+                p: ({ children }) => <p className="break-words overflow-wrap-anywhere">{children}</p>,
+              }}
+            >
               {message.message}
             </ReactMarkdown>
           </div>

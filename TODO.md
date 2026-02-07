@@ -202,12 +202,12 @@ This TODO list follows the implementation plan with alternating implementation a
 
 ### Conversation History
 
-- [ ] **Implement**: Update chat endpoint to handle conversation_id properly
-- [ ] **Test**: Send multiple messages with same conversation_id, verify history is maintained
-- [ ] **Implement**: Add loadConversation function to useChat
-- [ ] **Test**: Load conversation history, verify messages are displayed
-- [ ] **Implement**: Persist conversations in database
-- [ ] **Test**: Create conversation, restart app, verify conversation can be loaded
+- [x] **Implement**: Update chat endpoint to handle conversation_id properly
+- [x] **Test**: Send multiple messages with same conversation_id, verify history is maintained
+- [x] **Implement**: Add loadConversation function to useChat
+- [x] **Test**: Load conversation history, verify messages are displayed
+- [x] **Implement**: Persist conversations in database
+- [x] **Test**: Create conversation, restart app, verify conversation can be loaded
 
 ### Website Scraping Tool
 - [x] **Implement**: Create function tool declaration for LLM to respond with, signifying it wants to scraped the provided URL
@@ -229,6 +229,11 @@ This function will:
 - [ ] **Test**: Send message with URL, verify scraping is triggered automatically
 - [ ] **Implement**: Show scraping progress in chat
 - [ ] **Test**: Trigger scraping, verify progress indicator appears -->
+
+### Mobile friendly
+- [x] **Implement**: Adjust message bubble sizes and text breaks according to screen size in order to ensure 
+user and agent texts are kept within their message bubbles.
+
 
 ### Error Handling & User Feedback
 

@@ -12,3 +12,20 @@ body {
   background: var(--background);
   font-family: system-ui, -apple-system, sans-serif;
 }
+
+/* Ensure proper word wrapping in message bubbles for mobile */
+.overflow-wrap-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Ensure prose elements don't overflow on mobile */
+.prose {
+  max-width: 100%;
+}
+
+.prose pre,
+.prose code {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}

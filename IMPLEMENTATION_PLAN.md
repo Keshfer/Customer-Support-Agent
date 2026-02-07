@@ -433,7 +433,7 @@ Based on the finAI.png reference image, the chat interface will feature:
 - [ ] Add retry mechanisms
 - [ ] Add loading indicators:
   - Typing indicator for agent
-  - Scraping progress indicator
+  <!-- - Scraping progress indicator -->
 
 **Deliverables**:
 - Robust error handling

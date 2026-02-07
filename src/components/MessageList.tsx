@@ -84,14 +84,14 @@ export default function MessageList({
    */
   const renderLoadingIndicator = () => {
     return (
-      <div className="flex items-start gap-3 mb-4">
+      <div className="flex items-start gap-2 sm:gap-3 mb-4">
         {/* Agent avatar/logo */}
         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-agent flex items-center justify-center">
           <span className="text-agent-text text-xs font-bold">A</span>
         </div>
         
         {/* Loading bubble */}
-        <div className="flex flex-col max-w-[70%] md:max-w-md">
+        <div className="flex flex-col max-w-[85%] sm:max-w-[70%] md:max-w-md min-w-0">
           {/* Agent name */}
           <div className="flex items-center gap-2 mb-1">
             <span className="text-text-primary text-sm font-semibold">{agentName}</span>
@@ -100,7 +100,7 @@ export default function MessageList({
           </div>
           
           {/* Loading animation */}
-          <div className="bg-agent rounded-lg px-4 py-2">
+          <div className="bg-agent rounded-lg px-3 py-2 sm:px-4 max-w-full overflow-hidden">
             <div className="flex gap-1">
               <span className="w-2 h-2 bg-agent-text rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
               <span className="w-2 h-2 bg-agent-text rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
@@ -125,7 +125,7 @@ export default function MessageList({
   return (
     <div 
       ref={messagesContainerRef}
-      className="flex-1 overflow-y-auto px-4 py-6"
+      className="flex-1 overflow-y-auto px-2 sm:px-4 py-4 sm:py-6"
     >
       {/* Messages container */}
       <div className="space-y-1">
