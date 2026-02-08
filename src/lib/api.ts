@@ -327,6 +327,36 @@ export async function getAllConversations(): Promise<{
 }
 
 /**
+ * Delete a conversation
+ * 
+ * Deletes all messages associated with a conversation_id.
+ * After deletion, the conversation will no longer appear in conversation lists.
+ * 
+ * @param conversationId - The conversation ID to delete
+ * @returns Promise resolving to success message
+ * @throws ApiError if the request fails
+ */
+export async function deleteConversation(conversationId: string): Promise<{
+  message: string;
+}> {
+  try {
+    // Send DELETE request to delete conversation endpoint
+    const response = await apiClient.delete<{
+      message: string;
+    }>('/api/chat/conversation', {
+      data: {
+        conversation_id: conversationId,
+      },
+    });
+    // Return the response data
+    return response.data;
+  } catch (error) {
+    // Convert error to standardized ApiError format
+    throw handleApiError(error);
+  }
+}
+
+/**
  * Health check endpoint
  * 
  * Checks if the backend API is running and responsive.

@@ -440,6 +440,41 @@ def get_conversation_history(conversation_id):
 	except Exception as e:
 		logger.error(f"Error getting conversation history: {e}")
 		return None, f"Error getting conversation history: {e}"
+
+def delete_conversation(conversation_id):
+	"""
+	Delete all messages from a conversation by conversation_id.
+	
+	This function deletes all messages associated with a specific conversation_id.
+	After deletion, the conversation will no longer appear in conversation lists.
+	
+	Args:
+		conversation_id: The UUID string of the conversation to delete
+		
+	Returns:
+		Tuple (success, error_message):
+		- On success: (True, None)
+		- On error: (False, error_message_string)
+	"""
+	try:
+		with get_db_cursor(commit=True) as cursor:
+			# Delete all messages with the given conversation_id
+			cursor.execute("""
+				DELETE FROM messages 
+				WHERE conversation_id = %s;
+			""", (conversation_id,))
+			
+			# Check if any rows were deleted
+			deleted_count = cursor.rowcount
+			if deleted_count == 0:
+				return False, "No messages found for this conversation"
+			
+			logger.info(f"Successfully deleted {deleted_count} messages for conversation_id: {conversation_id}")
+			return True, None
+	except Exception as e:
+		logger.error(f"Error deleting conversation: {e}")
+		return False, f"Error deleting conversation: {e}"
+
 def get_all_conversation_histories():
 	"""Get all conversation unique conversation_ids in the order of most recent to oldest
 	Currently, this function gets all conversations in the table messages. Once multiple users are implemented,

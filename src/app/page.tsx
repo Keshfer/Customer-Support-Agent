@@ -19,8 +19,6 @@ import { useEffect, useRef } from 'react';
 import { useChat } from '@/hooks/useChat';
 // Chat interface component
 import ChatWindow from '@/components/ChatWindow';
-// Component for loading conversations by ID
-import ConversationLoader from '@/components/ConversationLoader';
 // Component for displaying conversation tabs
 import ConversationTabs from '@/components/ConversationTabs';
 // Error boundary component for catching errors
@@ -127,19 +125,13 @@ export default function Home() {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-background flex flex-col">
-        {/* Conversation Tabs Component */}
+        {/* Conversation Tabs Component with New Chat Button */}
         <ConversationTabs
           currentConversationId={conversationId}
           onConversationClick={handleConversationClick}
           isLoading={isLoading}
-        />
-
-        {/* Conversation Loader Component */}
-        <ConversationLoader
-          onLoadConversation={loadConversation}
-          isLoading={isLoading}
-          currentConversationId={conversationId}
           onClearConversation={handleClearConversation}
+          messages={messages}
         />
 
         {/* Chat Window Component */}

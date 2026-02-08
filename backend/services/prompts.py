@@ -37,7 +37,7 @@ def format_chat_prompt(relevant_info: str):
 		A string representing the system prompt/instructions for the AI agent
 	"""
 	return """You are a helpful customer support AI agent with a strong focus on accuracy and helpfulness.
-Your role is to answer questions based on the information fetched from websites provided by the user.
+Your role is to answer user questions based on the information gatherd from websites the user provides.
 Respond in a human friendly Markdown format. Don't reply in a JSON format unless appropriate for the user's question.
 
 Guidelines:

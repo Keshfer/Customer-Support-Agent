@@ -20,7 +20,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getAllConversations } from '@/lib/api';
+import { getAllConversations, deleteConversation } from '@/lib/api';
+import NewChatButton from './NewChatButton';
+import { Message } from '@/types';
 
 interface Conversation {
   conversation_id: string;
@@ -32,6 +34,10 @@ interface ConversationTabsProps {
   currentConversationId: string | null;
   onConversationClick: (conversationId: string) => void;
   isLoading?: boolean;
+  // Function to clear the current conversation
+  onClearConversation: () => void;
+  // Array of messages in the current conversation
+  messages: Message[];
 }
 
 /**
@@ -40,11 +46,15 @@ interface ConversationTabsProps {
  * @param currentConversationId - The ID of the currently active conversation
  * @param onConversationClick - Callback function when a conversation tab is clicked
  * @param isLoading - Whether conversations are being loaded
+ * @param onClearConversation - Function to clear the current conversation
+ * @param messages - Array of messages in the current conversation
  */
 export default function ConversationTabs({
   currentConversationId,
   onConversationClick,
   isLoading = false,
+  onClearConversation,
+  messages,
 }: ConversationTabsProps) {
   // State for storing all conversations
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -94,6 +104,62 @@ export default function ConversationTabs({
   };
 
   /**
+   * Handle deleting a conversation
+   * 
+   * Deletes the conversation and switches to the conversation to the left
+   * if the deleted conversation was the active one.
+   * 
+   * @param conversationIdToDelete - The ID of the conversation to delete
+   * @param event - The click event to prevent propagation
+   */
+  const handleDeleteConversation = async (
+    conversationIdToDelete: string,
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    // Prevent the tab click from firing
+    event.stopPropagation();
+
+    try {
+      // Delete the conversation from the backend
+      await deleteConversation(conversationIdToDelete);
+
+      // Find the index of the deleted conversation
+      const deletedIndex = conversations.findIndex(
+        (conv) => conv.conversation_id === conversationIdToDelete
+      );
+
+      // Remove the conversation from the local state
+      const updatedConversations = conversations.filter(
+        (conv) => conv.conversation_id !== conversationIdToDelete
+      );
+      setConversations(updatedConversations);
+
+      // If the deleted conversation was the active one, switch to the conversation to the left
+      if (conversationIdToDelete === currentConversationId) {
+        // Find the conversation to the left (previous index)
+        if (deletedIndex > 0 && updatedConversations.length > 0) {
+          // Switch to the conversation that was to the left
+          const conversationToLeft = updatedConversations[deletedIndex - 1];
+          if (conversationToLeft) {
+            onConversationClick(conversationToLeft.conversation_id);
+          }
+        } else if (updatedConversations.length > 0) {
+          // If we deleted the first conversation, switch to the new first one
+          onConversationClick(updatedConversations[0].conversation_id);
+        } else {
+          // No conversations left, clear the current conversation
+          onClearConversation();
+        }
+      }
+    } catch (err) {
+      // Handle error (could show a toast notification)
+      const error = err instanceof Error ? err : new Error('Failed to delete conversation');
+      console.error('Error deleting conversation:', error);
+      setError(error);
+    }
+  };
+
+  /**
    * Truncate message text for display in tabs
    * Limits the length to prevent tabs from being too wide
    * 
@@ -108,14 +174,17 @@ export default function ConversationTabs({
     return text.substring(0, maxLength) + '...';
   };
 
-  // Don't render if there are no conversations and not loading
-  if (!isFetching && conversations.length === 0 && !error) {
-    return null;
-  }
-
+  // Always render to show New Chat button, even if no conversations exist
   return (
     <div className="w-full bg-header border-b border-header-light overflow-x-auto">
       <div className="flex items-center gap-2 px-4 py-2 min-w-max">
+        {/* New Chat Button - always on the left */}
+        <NewChatButton
+          onClearConversation={onClearConversation}
+          isLoading={isLoading}
+          messages={messages}
+        />
+
         {/* Loading indicator */}
         {isFetching && (
           <div className="text-text-secondary text-sm px-3 py-1.5">
@@ -138,21 +207,49 @@ export default function ConversationTabs({
             : 'New Conversation';
           
           return (
-            <button
+            <div
               key={conversation.conversation_id}
-              onClick={() => handleTabClick(conversation.conversation_id)}
               className={`
-                px-3 py-1.5 rounded-t-lg text-sm font-medium whitespace-nowrap
+                flex items-center gap-1 rounded-t-lg
                 transition-colors duration-200
                 ${isActive
-                  ? 'bg-background text-text-primary border-t-2 border-l-2 border-r-2 border-header-light'
-                  : 'bg-header-light text-text-secondary hover:bg-header-light/80 hover:text-text-primary'
+                  ? 'bg-background border-t-2 border-l-2 border-r-2 border-header-light'
+                  : 'bg-header-light'
                 }
               `}
-              title={conversation.first_message || 'New Conversation'}
             >
-              {displayText}
-            </button>
+              <button
+                onClick={() => handleTabClick(conversation.conversation_id)}
+                className={`
+                  px-3 py-1.5 text-sm font-medium whitespace-nowrap
+                  transition-colors duration-200
+                  ${isActive
+                    ? 'text-text-primary'
+                    : 'text-text-secondary hover:bg-header-light/80 hover:text-text-primary'
+                  }
+                `}
+                title={conversation.first_message || 'New Conversation'}
+              >
+                {displayText}
+              </button>
+              <button
+                onClick={(e) => handleDeleteConversation(conversation.conversation_id, e)}
+                disabled={isLoading}
+                className={`
+                  px-2 py-1.5 text-xs font-bold rounded-t-lg
+                  transition-colors duration-200
+                  ${isActive
+                    ? 'text-text-secondary hover:text-text-primary hover:bg-background/50'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-header-light/80'
+                  }
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+                title="Delete conversation"
+                aria-label="Delete conversation"
+              >
+                ×
+              </button>
+            </div>
           );
         })}
       </div>

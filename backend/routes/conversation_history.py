@@ -10,7 +10,7 @@ All endpoints include request validation and comprehensive error handling.
 import logging
 from flask import Blueprint, request, jsonify
 from werkzeug.exceptions import HTTPException
-from backend.services.database_service import get_conversation_history, get_all_conversation_histories
+from backend.services.database_service import get_conversation_history, get_all_conversation_histories, delete_conversation
 
 # Create a Flask blueprint instance for conversation history routes
 # Blueprints allow us to organize routes into logical groups
@@ -190,3 +190,75 @@ def get_all_conversations_route():
 		# Catch all other exceptions and return 500 error
 		logger.error(f"Unexpected error in get_all_conversations_route: {e}", exc_info=True)
 		return jsonify({'error': 'An unexpected error occurred while retrieving all conversations'}), 500
+
+@conversation_history_bp.route('/chat/conversation', methods=['DELETE'])
+def delete_conversation_route():
+	"""
+	Delete a conversation by conversation ID.
+	
+	This endpoint deletes all messages associated with a conversation_id.
+	After deletion, the conversation will no longer appear in conversation lists.
+	
+	Request Body:
+		{
+			"conversation_id": "uuid-string"  # Required: The conversation ID to delete
+		}
+	
+	Returns:
+		Success (200): {
+			"message": "Conversation deleted successfully"
+		}
+		
+		Error (400): Missing or invalid conversation_id parameter
+		Error (404): No messages found for this conversation
+		Error (415): Invalid Content-Type header
+		Error (500): Database error
+	
+	Raises:
+		HTTPException: Re-raised for proper Flask error handling
+		Exception: Catches all other exceptions and returns 500 error
+	"""
+	try:
+		# Step 1: Validate Content-Type header first
+		content_type = request.headers.get('Content-Type')
+		if content_type and 'application/json' not in content_type:
+			logger.warning("Invalid Content-Type header in delete conversation request")
+			return jsonify({'error': 'Content-Type must be application/json'}), 415
+		
+		# Step 2: Extract and validate request data
+		data = request.get_json(silent=True)
+		if data is None:
+			logger.warning("Missing or invalid request body in delete conversation request")
+			return jsonify({'error': 'Request body is required and must be valid JSON'}), 400
+		
+		# Step 3: Validate that request contains 'conversation_id' field
+		conversation_id = data.get('conversation_id', '').strip()
+		if not conversation_id:
+			logger.warning("Missing or empty 'conversation_id' field in delete conversation request")
+			return jsonify({'error': 'Conversation ID is required in request body and cannot be empty'}), 400
+		
+		# Step 4: Delete conversation from database
+		logger.info(f"Deleting conversation with conversation_id: {conversation_id}")
+		success, error = delete_conversation(conversation_id)
+		
+		# Step 5: Handle database function response
+		if error:
+			# Check if it's a "not found" error vs a database error
+			if "No messages found" in error:
+				logger.info(f"No messages found for conversation_id: {conversation_id}")
+				return jsonify({'error': error}), 404
+			else:
+				# Database or other error occurred
+				logger.error(f"Database error deleting conversation: {error}")
+				return jsonify({'error': error}), 500
+		
+		# Step 6: Return success response
+		logger.info(f"Successfully deleted conversation with conversation_id: {conversation_id}")
+		return jsonify({'message': 'Conversation deleted successfully'}), 200
+		
+	except HTTPException as e:
+		logger.warning(f"HTTP exception in delete_conversation_route: {e.code} - {e.description}")
+		return jsonify({'error': e.description}), e.code
+	except Exception as e:
+		logger.error(f"Unexpected error in delete_conversation_route: {e}", exc_info=True)
+		return jsonify({'error': 'An unexpected error occurred while deleting conversation'}), 500
