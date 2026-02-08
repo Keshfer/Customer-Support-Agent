@@ -10,7 +10,7 @@ All endpoints include request validation and comprehensive error handling.
 import logging
 from flask import Blueprint, request, jsonify
 from werkzeug.exceptions import HTTPException
-from backend.services.database_service import get_conversation_history
+from backend.services.database_service import get_conversation_history, get_all_conversation_histories
 
 # Create a Flask blueprint instance for conversation history routes
 # Blueprints allow us to organize routes into logical groups
@@ -141,3 +141,52 @@ def get_conversation_history_route():
 		logger.error(f"Unexpected error in get_conversation_history_route: {e}", exc_info=True)
 		return jsonify({'error': 'An unexpected error occurred while retrieving conversation history'}), 500
 
+@conversation_history_bp.route('/chat/all_conversations', methods=['GET'])
+def get_all_conversations_route():
+	"""
+	Get all conversation histories.
+	
+	This endpoint retrieves all conversations with their conversation IDs, timestamps,
+	and first user messages. The conversations are ordered by most recent first.
+	This is useful for displaying conversation tabs or a conversation list.
+	
+	Returns:
+		Success (200): {
+			"conversations": [
+				{
+					"conversation_id": "uuid-string",
+					"timestamp": "2024-01-01T00:00:00",
+					"first_message": "Hello, I need help"
+				},
+				...
+			]
+		}
+		
+		Error (404): No conversations found
+		Error (500): Database error
+	"""
+	try:
+		# Retrieve all conversation histories from database
+		logger.info("Retrieving all conversation histories")
+		conversations_list, error = get_all_conversation_histories()
+		
+		# Handle database function response
+		if error:
+			# Check if it's a "not found" error vs a database error
+			if "No conversation histories found" in error:
+				logger.info("No conversation histories found")
+				return jsonify({'conversations': []}), 200
+			else:
+				# Database or other error occurred
+				logger.error(f"Database error retrieving all conversation histories: {error}")
+				#return jsonify({'error': error}), 500
+				return jsonify({'error': 'An unexpected error occurred while retrieving all conversations (database)'}), 500
+		
+		# Return conversation histories
+		logger.info(f"Successfully retrieved {len(conversations_list)} conversations")
+		return jsonify({'conversations': conversations_list}), 200
+		
+	except Exception as e:
+		# Catch all other exceptions and return 500 error
+		logger.error(f"Unexpected error in get_all_conversations_route: {e}", exc_info=True)
+		return jsonify({'error': 'An unexpected error occurred while retrieving all conversations'}), 500

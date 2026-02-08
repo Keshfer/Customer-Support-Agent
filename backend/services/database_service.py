@@ -3,6 +3,7 @@ from pgvector.psycopg2 import register_vector
 import psycopg2.pool
 from backend.config import DATABASE_URL
 import logging
+import json
 from contextlib import contextmanager
 
 # Set up logging
@@ -439,30 +440,68 @@ def get_conversation_history(conversation_id):
 	except Exception as e:
 		logger.error(f"Error getting conversation history: {e}")
 		return None, f"Error getting conversation history: {e}"
-def get_all_conversation_ids():
-	"""Get all conversation histories (returns all conversations with their messages)"""
+def get_all_conversation_histories():
+	"""Get all conversation unique conversation_ids in the order of most recent to oldest
+	Currently, this function gets all conversations in the table messages. Once multiple users are implemented,
+	update this function to get all conversation ids belonging to a specific user.
+	
+	Returns:
+		List of conversation objects with conversation_id, timestamp, and first_user_message
+		None if no conversation histories are found
+		Error message if there is an error
+	"""
 	try:
 		with get_db_cursor() as cursor:
+			# Get all distinct conversations with their most recent timestamp
+			# and the first user message for each conversation
 			cursor.execute("""
-				SELECT id, conversation_id, message, sender, timestamp
-				FROM messages
-				ORDER BY conversation_id ASC;
+				WITH conversation_timestamps AS (
+					SELECT DISTINCT conversation_id, 
+						   MAX(timestamp) as latest_timestamp
+					FROM messages
+					GROUP BY conversation_id
+				),
+				first_user_messages AS (
+					SELECT DISTINCT ON (conversation_id)
+						conversation_id,
+						message as first_message
+					FROM messages
+					WHERE sender = 'user'
+					ORDER BY conversation_id, timestamp ASC
+				)
+				SELECT 
+					ct.conversation_id,
+					ct.latest_timestamp,
+					COALESCE(fum.first_message, '') as first_message
+				FROM conversation_timestamps ct
+				LEFT JOIN first_user_messages fum ON ct.conversation_id = fum.conversation_id
+				ORDER BY ct.latest_timestamp DESC;
 			""")
-			messages = cursor.fetchall()
-			if not messages:
+			conversations = cursor.fetchall()
+			if not conversations:
 				return None, "No conversation histories found"
-			conversation_histories_list = []
-			for m in messages:
-				conversation_histories_list.append(
+			conversation_list = []
+			for c in conversations:
+				# Parse the first message if it's JSON to extract content
+				first_message = c[2] if c[2] else ""
+				# Try to parse as JSON to extract content if it's a structured message
+				if first_message:
+					try:
+						message_json = json.loads(first_message)
+						if isinstance(message_json, dict) and message_json.get('type') == 'message':
+							first_message = message_json.get('content', first_message)
+					except (json.JSONDecodeError, TypeError, ValueError):
+						# If not JSON, use as-is
+						pass
+				
+				conversation_list.append(
 					{
-						'id': m[0],
-						'conversation_id': m[1],
-						'message': m[2],
-						'sender': m[3],
-						'timestamp': m[4]
+						"conversation_id": c[0],
+						"timestamp": c[1].isoformat() if c[1] else None,
+						"first_message": first_message
 					}
 				)
-			return conversation_histories_list, None
+			return conversation_list, None
 	except Exception as e:
 		logger.error(f"Error getting all conversation histories: {e}")
 		return None, f"Error getting all conversation histories: {e}"

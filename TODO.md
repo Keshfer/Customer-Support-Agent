@@ -220,6 +220,14 @@ This function will:
   * return the generated response to the front end.
 - [x] **Test**: Test the function returns a generated response after scraping a website.
 
+### Conversation tabs
+
+GOAL: Have conversation tabs at the top of the page that the user can click on in order to switch to that conversation. 
+
+- [] **Implement**: inside conversation_history.py, create a route function that calls get_all_conversation_histories and returns it.
+- [] **Implement**: render tabs at the top of the page that users can click on to navigate to that conversation.
+Set the title of the tab to the first message sent in that conversation.
+- [] **Implement**: Upon clicking a conversation tab, load the conversation to the frontend and display the conversation. Don't reload a conversation if the user clicks on the currently active conversation tab.
 
 <!-- ### Website URL Detection
 

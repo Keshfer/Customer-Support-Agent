@@ -293,6 +293,40 @@ export async function getConversationHistory(
 }
 
 /**
+ * Get all conversations
+ * 
+ * Retrieves all conversations with their conversation IDs, timestamps, and first user messages.
+ * The conversations are ordered by most recent first.
+ * This is useful for displaying conversation tabs or a conversation list.
+ * 
+ * @returns Promise resolving to conversations list response containing array of conversations
+ * @throws ApiError if the request fails
+ */
+export async function getAllConversations(): Promise<{
+  conversations: Array<{
+    conversation_id: string;
+    timestamp: string | null;
+    first_message: string;
+  }>;
+}> {
+  try {
+    // Send GET request to all conversations endpoint
+    const response = await apiClient.get<{
+      conversations: Array<{
+        conversation_id: string;
+        timestamp: string | null;
+        first_message: string;
+      }>;
+    }>('/api/chat/all_conversations');
+    // Return the response data (contains conversations array)
+    return response.data;
+  } catch (error) {
+    // Convert error to standardized ApiError format
+    throw handleApiError(error);
+  }
+}
+
+/**
  * Health check endpoint
  * 
  * Checks if the backend API is running and responsive.
