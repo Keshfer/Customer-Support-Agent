@@ -21,6 +21,8 @@ import { useChat } from '@/hooks/useChat';
 import ChatWindow from '@/components/ChatWindow';
 // Component for loading conversations by ID
 import ConversationLoader from '@/components/ConversationLoader';
+// Component for displaying conversation tabs
+import ConversationTabs from '@/components/ConversationTabs';
 // Error boundary component for catching errors
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -105,9 +107,33 @@ export default function Home() {
     sendMessage(message);
   };
 
+  /**
+   * Handle clicking on a conversation tab
+   * 
+   * Loads the conversation history for the clicked conversation.
+   * This function is passed to ConversationTabs component.
+   * 
+   * @param conversationId - The ID of the conversation to load
+   */
+  const handleConversationClick = (conversationId: string) => {
+    // Load the conversation using the loadConversation function from useChat hook
+    loadConversation(conversationId).catch((err) => {
+      // If loading fails, log the error
+      // The error will be displayed via the error state
+      console.error('Failed to load conversation:', err);
+    });
+  };
+
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-background flex flex-col">
+        {/* Conversation Tabs Component */}
+        <ConversationTabs
+          currentConversationId={conversationId}
+          onConversationClick={handleConversationClick}
+          isLoading={isLoading}
+        />
+
         {/* Conversation Loader Component */}
         <ConversationLoader
           onLoadConversation={loadConversation}
