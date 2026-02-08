@@ -18,7 +18,7 @@ else:
 	firecrawl = None
 
 # scrape a website
-def scrape_website(url: str, attempts: int = 3) -> Optional[dict]:
+def scrape_website(url: str, attempts: int = 1) -> Optional[dict]:
 	"""
 	Scrapes a website page and returns the title and markdown content
 	Args:
