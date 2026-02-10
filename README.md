@@ -128,33 +128,33 @@ POSTGRES_PASSWORD=
 3. Prepare Postgres database (project was developed with docker container)
 Make sure you have docker installed
 
-Pull the postgres image
-```
-docker pull postgres:16.11
-```
+    1. Pull the postgres image
 
-Create and run a docker container
-```
-docker run --name NAME_OF_CONTAINER -e POSTGRES_PASSWORD=DESIRED_PASSWORD postgres
-```
+    ```docker pull postgres:16.11```
 
-```
-createdb database_name
 
-or connect vis psql and enter
+    2. Create and run a docker container
+    ```
+    docker run --name NAME_OF_CONTAINER -e POSTGRES_PASSWORD=DESIRED_PASSWORD postgres
+    ```
 
-CREATE database_name
-```
-Run the schema once connected to the database
-```
-CREATE SCHEMA database_schema.sql
-```
 
-Set the DATABASE_URL environment variable
+    ```createdb database_name```
 
-```
-DATABASE_URL=postgresql://postgres:PASSWORD@localhost:5432/DATABASE_NAME
-```
+    or connect vis psql and enter
+
+    ```CREATE database_name```
+
+    3. Run the schema once connected to the database
+    ```
+    CREATE SCHEMA database_schema.sql
+    ```
+
+    4. Set the DATABASE_URL environment variable
+
+    ```
+    DATABASE_URL=postgresql://postgres:PASSWORD@localhost:5432/DATABASE_NAME
+    ```
 
 4. From project root, run the Flask backend 
 
