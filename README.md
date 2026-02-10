@@ -125,7 +125,7 @@ POSTGRES_PASSWORD=
 ```
 2. Run 'pip install -r requirements.txt' to install dependencies
 
-3.Prepare Postgres database (project was developed with docker container)
+3. Prepare Postgres database (project was developed with docker container)
 Make sure you have docker installed
 
 Pull the postgres image
