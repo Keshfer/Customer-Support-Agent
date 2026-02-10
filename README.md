@@ -3,7 +3,7 @@
 An LLM-powered customer support agent designed to perform question-and-answer conversations with users. The agent analyzes user-provided web sources and provides detailed, organized, and readable answers to questions about the content from those sources.
 
 ## Video Demo
-
+[![Watch the video](https://raw.githubusercontent.com/keshfer/Customer-Support-Agent/main/assets/thumbnail.jpg)](https://raw.githubusercontent.com/Keshfer/Customer-Support-Agent/main/assets/Custosupport-demo.mp4)
 
 ## Features
 
@@ -110,3 +110,61 @@ backend/
 │
 └── requirements.txt          # Python package dependencies file listing all required packages and their versions
 ```
+## How to Run
+0. Install NodeJs version v24.12.0
+
+1. Set up .env file:
+```
+OPENAI_API_KEY=
+FIRECRAWL_API_KEY=
+DATABASE_URL= 
+FLASK_ENV=
+FLASK_DEBUG=1
+POSTGRES_PASSWORD=
+```
+2. Run 'pip install -r requirements.txt' to install dependencies
+
+3.Prepare Postgres database (project was developed with docker container)
+Make sure you have docker installed
+
+Pull the postgres image
+```
+docker pull postgres:16.11
+```
+
+Create and run a docker container
+```
+docker run --name NAME_OF_CONTAINER -e POSTGRES_PASSWORD=DESIRED_PASSWORD postgres
+```
+
+```
+createdb database_name
+
+or connect vis psql and enter
+
+CREATE database_name
+```
+Run the schema once connected to the database
+```
+CREATE SCHEMA database_schema.sql
+```
+
+Set the DATABASE_URL environment variable
+
+```
+DATABASE_URL=postgresql://postgres:PASSWORD@localhost:5432/DATABASE_NAME
+```
+
+4. From project root, run the Flask backend 
+
+```
+python -m backend.app
+```
+
+5. run the frontend using
+
+```
+npm run dev
+```
+
+
