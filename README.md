@@ -3,7 +3,7 @@
 An LLM-powered customer support agent designed to perform question-and-answer conversations with users. The agent analyzes user-provided web sources and provides detailed, organized, and readable answers to questions about the content from those sources.
 
 ## Video Demo
-[![Watch the video](https://raw.githubusercontent.com/keshfer/Customer-Support-Agent/main/assets/thumbnail.jpg)](https://raw.githubusercontent.com/Keshfer/Customer-Support-Agent/main/assets/Custosupport-demo.mp4)
+[![Watch the video](https://raw.githubusercontent.com/keshfer/Customer-Support-Agent/main/assets/demo_thumbnail.png)](https://raw.githubusercontent.com/Keshfer/Customer-Support-Agent/main/assets/Custosupport-demo.mp4)
 
 ## Features
 
