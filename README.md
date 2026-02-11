@@ -2,6 +2,9 @@
 
 An LLM-powered customer support agent designed to perform question-and-answer conversations with users. The agent analyzes user-provided web sources and provides detailed, organized, and readable answers to questions about the content from those sources.
 
+![Project Preview](./assets/preview.gif)
+
+
 ## Video Demo
 
 [![Watch the demo](https://img.youtube.com/vi/NoAYPrKUTmk/0.jpg)](https://youtu.be/NoAYPrKUTmk)
