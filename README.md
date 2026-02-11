@@ -4,7 +4,7 @@ An LLM-powered customer support agent designed to perform question-and-answer co
 
 ## Video Demo
 
-https://github.com/user-attachments/assets/0f5e50d7-1f6f-4f08-a0c8-e70edb12bf1a
+[![Watch the demo]()](https://youtu.be/NoAYPrKUTmk)
 
 ## Features
 
