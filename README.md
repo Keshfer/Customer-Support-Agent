@@ -2,9 +2,12 @@
 
 An LLM-powered customer support agent designed to perform question-and-answer conversations with users. The agent analyzes user-provided web sources and provides detailed, organized, and readable answers to questions about the content from those sources.
 
+![Project Preview](./assets/preview.gif)
+
+
 ## Video Demo
 
-https://github.com/user-attachments/assets/0f5e50d7-1f6f-4f08-a0c8-e70edb12bf1a
+[![Watch the demo](https://img.youtube.com/vi/NoAYPrKUTmk/0.jpg)](https://youtu.be/NoAYPrKUTmk)
 
 ## Features
 
@@ -125,36 +128,36 @@ POSTGRES_PASSWORD=
 ```
 2. Run 'pip install -r requirements.txt' to install dependencies
 
-3.Prepare Postgres database (project was developed with docker container)
+3. Prepare Postgres database (project was developed with docker container)
 Make sure you have docker installed
 
-Pull the postgres image
-```
-docker pull postgres:16.11
-```
+    1. Pull the postgres image
 
-Create and run a docker container
-```
-docker run --name NAME_OF_CONTAINER -e POSTGRES_PASSWORD=DESIRED_PASSWORD postgres
-```
+    ```docker pull postgres:16.11```
 
-```
-createdb database_name
 
-or connect vis psql and enter
+    2. Create and run a docker container
+    ```
+    docker run --name NAME_OF_CONTAINER -e POSTGRES_PASSWORD=DESIRED_PASSWORD postgres
+    ```
 
-CREATE database_name
-```
-Run the schema once connected to the database
-```
-CREATE SCHEMA database_schema.sql
-```
 
-Set the DATABASE_URL environment variable
+    ```createdb database_name```
 
-```
-DATABASE_URL=postgresql://postgres:PASSWORD@localhost:5432/DATABASE_NAME
-```
+    or connect vis psql and enter
+
+    ```CREATE database_name```
+
+    3. Run the schema once connected to the database
+    ```
+    CREATE SCHEMA database_schema.sql
+    ```
+
+    4. Set the DATABASE_URL environment variable
+
+    ```
+    DATABASE_URL=postgresql://postgres:PASSWORD@localhost:5432/DATABASE_NAME
+    ```
 
 4. From project root, run the Flask backend 
 
